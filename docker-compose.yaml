@@ -1,6 +1,6 @@
 version: '3'
 services:
-  mastodon-bot:
+  truth-bot:
     container_name: "truth-bot"
     build: .
     tty: true
