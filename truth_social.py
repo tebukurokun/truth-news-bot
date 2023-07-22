@@ -2,7 +2,16 @@ from truthbrush.api import Api
 import json
 import os
 from dotenv import load_dotenv
+from logging import getLogger, StreamHandler, DEBUG, FileHandler
 
+logger = getLogger(__name__)
+handler = StreamHandler()
+handler.setLevel(DEBUG)
+handler2 = FileHandler(filename="/proc/1/fd/1")
+logger.setLevel(DEBUG)
+logger.addHandler(handler)
+logger.addHandler(handler2)
+logger.propagate = False
 
 load_dotenv()  # take environment variables from .env.
 api = Api(
@@ -15,7 +24,7 @@ api = Api(
 def compose_truth(message: str):
     """Compose Truth."""
 
-    print(json.dumps(api.compose_truth(message)))
+    logger.debug(json.dumps(api.compose_truth(message)))
 
 
 if __name__ == '__main__' :
