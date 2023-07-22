@@ -20,7 +20,7 @@ def publish():
 
     for article in updated_articles:
         logger.debug(article.title)
-        content = f'{article.title}\n{article.link}'
+        content = f'{article.title}\n{article.link}\n#nhk_news'
         compose_truth(content)
 
 
