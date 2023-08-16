@@ -4,8 +4,9 @@ import feedparser
 import pytz
 from dataclasses import dataclass
 
-RSS_URL = 'https://www3.nhk.or.jp/rss/news/cat0.xml'
 JST = pytz.timezone('Asia/Tokyo')
+
+RSS_URL = 'https://www3.nhk.or.jp/rss/news/cat0.xml'
 PREVIOUS_URL_FILE = 'data_files/nhk_previous_url.txt'
 
 
@@ -15,32 +16,32 @@ class Article:
     link: str
 
 
-def _get_previous_article_urls() -> Set[str]:
+def _get_previous_article_urls(previous_url_file: str) -> Set[str]:
     """
     前回の処理で存在した記事のurlをsetで取得.
     """
-    with open(PREVIOUS_URL_FILE) as f:
+    with open(previous_url_file) as f:
         urls = set(s.strip() for s in f.readlines())
     return urls
 
 
-def _save_article_urls(urls: list[str]):
-    with open(PREVIOUS_URL_FILE, 'w', encoding = "utf-8") as txt_file:
+def save_article_urls(urls: list[str], previous_url_file: str):
+    with open(previous_url_file, 'w', encoding = "utf-8") as txt_file:
         txt_file.write("\n".join(urls))
 
 
-def get_updated_articles() -> List[Article]:
+def get_updated_articles(url: str, previous_url_file: str) -> List[Article]:
     """
     更新された記事を取得.
     """
     # rssのurlから記事取得
-    rss_data = feedparser.parse(RSS_URL)
+    rss_data = feedparser.parse(url)
     rss_entries = rss_data.entries
 
     # 前回の記事のurlを取得
-    previous_urls = _get_previous_article_urls()
+    previous_urls = _get_previous_article_urls(previous_url_file)
     # 今回の記事のurlを保存
-    _save_article_urls([entry.link for entry in  rss_entries])
+    save_article_urls([entry.link for entry in rss_entries], previous_url_file)
 
     updated_entries = []
 
@@ -55,4 +56,4 @@ def get_updated_articles() -> List[Article]:
 
 
 if __name__ == '__main__':
-    print(get_updated_articles())
+    print(get_updated_articles(RSS_URL, PREVIOUS_URL_FILE))
