@@ -9,14 +9,21 @@
 
 ### set environment variables
 ``` bash
-TRUTHSOCIAL_USERNAME=foo
-TRUTHSOCIAL_PASSWORD=bar
+TEST_TRUTHSOCIAL_USERNAME=foo
+TEST_TRUTHSOCIAL_PASSWORD=bar
+NHK_TRUTHSOCIAL_USERNAME=foo
+NHK_TRUTHSOCIAL_PASSWORD=bar
+ASAHI_SANKEI_TRUTHSOCIAL_USERNAME=foo
+ASAHI_SANKEI_TRUTHSOCIAL_PASSWORD=bar
+
 ```
 
 ## usage
 ```bash
 docker compose up -d --build
+docker exec truth-bot python -u initialize.py
 docker exec truth-bot python -u nhk_news_bot.py
+docker exec truth-bot python -u asahi_sankei_news_bot.py
 ```
 
 
