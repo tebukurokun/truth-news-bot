@@ -27,8 +27,8 @@ def compose_truth(username: str, password: str, message: str):
     """Compose Truth."""
 
     api = Api(
-        os.getenv(username),
-        os.getenv(password),
+        username,
+        password,
         os.getenv("TRUTHSOCIAL_TOKEN"),
     )
     logger.debug(json.dumps(api.compose_truth(message)))

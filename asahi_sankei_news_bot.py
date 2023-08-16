@@ -3,6 +3,7 @@ import os
 from nhk_news_feed import get_updated_articles
 from truth_social import compose_truth
 from logging import getLogger, StreamHandler, DEBUG, FileHandler
+from dotenv import load_dotenv
 
 logger = getLogger(__name__)
 handler = StreamHandler()
@@ -12,6 +13,8 @@ logger.setLevel(DEBUG)
 logger.addHandler(handler)
 logger.addHandler(handler2)
 logger.propagate = False
+
+load_dotenv()  # take environment variables from .env.
 
 ASAHI_RSS_URL = 'https://www.asahi.com/rss/asahi/newsheadlines.rdf'
 ASAHI_PREVIOUS_URL_FILE = 'data_files/asahi_previous_url.txt'
