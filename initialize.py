@@ -2,7 +2,7 @@ from typing import List, Set
 from dataclasses import dataclass
 import feedparser
 
-from nhk_news_feed import save_article_urls
+from news_feeder import save_new_article_urls
 
 NHK_RSS_URL = 'https://www3.nhk.or.jp/rss/news/cat0.xml'
 NHK_PREVIOUS_URL_FILE = 'data_files/nhk_previous_url.txt'
@@ -18,7 +18,7 @@ def initialize_previous_url(rss_url: str, file: str):
     rss_entries = rss_data.entries
     urls = [entry.link for entry in rss_entries]
 
-    save_article_urls(urls, file)
+    save_new_article_urls(urls, file)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,6 @@
 import time
 import os
-from nhk_news_feed import get_updated_articles
+from news_feeder import get_updated_articles
 from truth_social import compose_truth
 from logging import getLogger, StreamHandler, DEBUG, FileHandler
 
