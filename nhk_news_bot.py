@@ -15,8 +15,8 @@ logger.propagate = False
 
 NHK_RSS_URL = 'https://www3.nhk.or.jp/rss/news/cat0.xml'
 NHK_PREVIOUS_URL_FILE = 'data_files/nhk_previous_url.txt'
-NHK_USERNAME = os.getenv("TEST_TRUTHSOCIAL_USERNAME")
-NHK_PASSWORD = os.getenv("TEST_TRUTHSOCIAL_PASSWORD")
+NHK_USERNAME = os.getenv("NHK_TRUTHSOCIAL_USERNAME")
+NHK_PASSWORD = os.getenv("NHK_TRUTHSOCIAL_PASSWORD")
 
 
 def publish():
