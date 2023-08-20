@@ -24,13 +24,13 @@ def publish():
     updated_articles = get_updated_articles(NHK_RSS_URL, NHK_PREVIOUS_URL_FILE)
 
     if not updated_articles:
-        logger.debug("no article")
+        logger.debug("no article(nhk)")
 
     for article in updated_articles:
-        logger.debug(article.title)
+        logger.debug(f'nhk: {article.title}')
         content = f'{article.title}\n{article.link}\n#nhk_news #inkei_news'
         compose_truth(NHK_USERNAME, NHK_PASSWORD, NHK_TOKEN, content)
-        time.sleep(5)
+        time.sleep(10)
 
 
 if __name__ == '__main__':

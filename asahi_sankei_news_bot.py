@@ -33,7 +33,7 @@ def publish():
         logger.debug("no article (asahi)")
 
     for article in asahi_updated_articles:
-        logger.debug(article.title)
+        logger.debug(f'asahi: {article.title}')
         content = f'{article.title}\n{article.link}\n#inkei_news'
         compose_truth(ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, ASAHI_SANKEI_TOKEN, content)
         time.sleep(10)
@@ -44,7 +44,7 @@ def publish():
         logger.debug("no article (sankei)")
 
     for article in sankei_updated_articles:
-        logger.debug(article.title)
+        logger.debug(f'sankei: {article.title}')
         content = f'{article.title}\n{article.link}\n#inkei_news'
         compose_truth(ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, ASAHI_SANKEI_TOKEN, content)
         time.sleep(10)
