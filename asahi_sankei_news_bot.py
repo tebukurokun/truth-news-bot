@@ -35,7 +35,7 @@ def publish():
         logger.debug(article.title)
         content = f'{article.title}\n{article.link}\n#inkei_news'
         compose_truth(ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, content)
-        time.sleep(5)
+        time.sleep(10)
 
     sankei_updated_articles = get_updated_articles(SANKEI_RSS_URL, SANKEI_PREVIOUS_URL_FILE)
 
@@ -46,7 +46,7 @@ def publish():
         logger.debug(article.title)
         content = f'{article.title}\n{article.link}\n#inkei_news'
         compose_truth(ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, content)
-        time.sleep(5)
+        time.sleep(10)
 
 
 if __name__ == '__main__':
