@@ -17,6 +17,7 @@ NHK_RSS_URL = 'https://www3.nhk.or.jp/rss/news/cat0.xml'
 NHK_PREVIOUS_URL_FILE = 'data_files/nhk_previous_url.txt'
 NHK_USERNAME = os.getenv("NHK_TRUTHSOCIAL_USERNAME")
 NHK_PASSWORD = os.getenv("NHK_TRUTHSOCIAL_PASSWORD")
+NHK_TOKEN = os.getenv("NHK_TRUTHSOCIAL_TOKEN")
 
 
 def publish():
@@ -28,7 +29,7 @@ def publish():
     for article in updated_articles:
         logger.debug(article.title)
         content = f'{article.title}\n{article.link}\n#nhk_news #inkei_news'
-        compose_truth(NHK_USERNAME, NHK_PASSWORD, content)
+        compose_truth(NHK_USERNAME, NHK_PASSWORD, NHK_TOKEN, content)
         time.sleep(5)
 
 

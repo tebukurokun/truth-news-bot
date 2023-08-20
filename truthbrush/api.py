@@ -1,5 +1,7 @@
 from time import sleep
 from typing import Any, Iterator, List, Optional
+from urllib.error import HTTPError
+
 from loguru import logger
 from dateutil import parser as date_parse
 from datetime import datetime, timezone, date
@@ -21,8 +23,8 @@ API_BASE_URL = "https://truthsocial.com/api"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
 
 # Oauth client credentials, from https://truthsocial.com/packs/js/application-d77ef3e9148ad1d0624c.js
-CLIENT_ID = "9X1Fdd-pxNsAgEDNi_SfhJWi8T-vLuV2WVzKIbkTCw4"
-CLIENT_SECRET = "ozF8jzI4968oTKFkEnsBC-UbLPCdrSv0MkXGQu2o_-M"
+CLIENT_ID = "F73RWi1Ik75RCUnK1kkgGBQuJHgZ7AZnmst1QJnDLJQ"
+CLIENT_SECRET = "md7Fd520jydjcbhLKDsLTAUErfdKYYSEC9iA8aNedy4"
 
 proxies = {"http": os.getenv("http_proxy"), "https": os.getenv("https_proxy")}
 
@@ -341,12 +343,14 @@ class Api:
                     "user-agent": USER_AGENT,
                 },
             )
+            print(sess_req)
             sess_req.raise_for_status()
-        except requests.exceptions.HTTPError as e:
+        except Exception as e:
             logger.error(f"Failed login request: {str(e)}")
             return None
 
         if not sess_req.json()["access_token"]:
             raise ValueError("Invalid truthsocial.com credentials provided!")
 
+        print(sess_req.json()["access_token"])
         return sess_req.json()["access_token"]

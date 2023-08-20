@@ -23,6 +23,7 @@ SANKEI_PREVIOUS_URL_FILE = 'data_files/sankei_previous_url.txt'
 
 ASAHI_SANKEI_USERNAME = os.getenv("ASAHI_SANKEI_TRUTHSOCIAL_USERNAME")
 ASAHI_SANKEI_PASSWORD = os.getenv("ASAHI_SANKEI_TRUTHSOCIAL_PASSWORD")
+ASAHI_SANKEI_TOKEN = os.getenv("ASAHI_SANKEI_TRUTHSOCIAL_TOKEN")
 
 
 def publish():
@@ -34,7 +35,7 @@ def publish():
     for article in asahi_updated_articles:
         logger.debug(article.title)
         content = f'{article.title}\n{article.link}\n#inkei_news'
-        compose_truth(ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, content)
+        compose_truth(ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, ASAHI_SANKEI_TOKEN, content)
         time.sleep(10)
 
     sankei_updated_articles = get_updated_articles(SANKEI_RSS_URL, SANKEI_PREVIOUS_URL_FILE)
@@ -45,7 +46,7 @@ def publish():
     for article in sankei_updated_articles:
         logger.debug(article.title)
         content = f'{article.title}\n{article.link}\n#inkei_news'
-        compose_truth(ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, content)
+        compose_truth(ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, ASAHI_SANKEI_TOKEN, content)
         time.sleep(10)
 
 

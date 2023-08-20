@@ -23,13 +23,13 @@ load_dotenv()  # take environment variables from .env.
 # )
 
 
-def compose_truth(username: str, password: str, message: str):
+def compose_truth(username: str, password: str, token: str, message: str):
     """Compose Truth."""
 
     api = Api(
         username,
         password,
-        os.getenv("TRUTHSOCIAL_TOKEN"),
+        token,
     )
     logger.debug(json.dumps(api.compose_truth(message)))
 
