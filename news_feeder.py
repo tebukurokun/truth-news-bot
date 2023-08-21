@@ -51,7 +51,6 @@ def get_updated_articles(url: str, previous_url_file: str) -> List[Article]:
             updated_entries.append(Article(entry.title, entry.link))
 
     if updated_entries:
-        updated_entries = list(set(updated_entries))
         # 3件まで取得.それより多い分は次の実行で取得される
         updated_entries = updated_entries[:3]
         # 増えた記事のurlをtxtファイルに保存
