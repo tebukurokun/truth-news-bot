@@ -4,10 +4,10 @@ import feedparser
 import pytz
 from dataclasses import dataclass
 
-JST = pytz.timezone('Asia/Tokyo')
+JST = pytz.timezone("Asia/Tokyo")
 
-RSS_URL = 'https://assets.wor.jp/rss/rdf/sankei/flash.rdf'
-PREVIOUS_URL_FILE = 'data_files/sankei_previous_url.txt'
+RSS_URL = "https://assets.wor.jp/rss/rdf/sankei/flash.rdf"
+PREVIOUS_URL_FILE = "data_files/sankei_previous_url.txt"
 
 
 @dataclass
@@ -26,7 +26,7 @@ def _get_past_article_urls(previous_url_file: str) -> Set[str]:
 
 
 def save_new_article_urls(mew_urls: list[str], previous_url_file: str):
-    with open(previous_url_file, 'a', encoding = "utf-8") as txt_file:
+    with open(previous_url_file, "a", encoding="utf-8") as txt_file:
         txt_file.write("\n".join(mew_urls) + "\n")
 
 
@@ -54,10 +54,12 @@ def get_updated_articles(url: str, previous_url_file: str) -> List[Article]:
         # 3件まで取得.それより多い分は次の実行で取得される
         updated_entries = updated_entries[:3]
         # 増えた記事のurlをtxtファイルに保存
-        save_new_article_urls([article.link for article in updated_entries], previous_url_file)
+        save_new_article_urls(
+            [article.link for article in updated_entries], previous_url_file
+        )
 
     return updated_entries
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(get_updated_articles(RSS_URL, PREVIOUS_URL_FILE))
