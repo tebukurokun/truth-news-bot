@@ -16,6 +16,8 @@ BBC_YOUTUBE_RSS_URL = (
     "https://www.youtube.com/feeds/videos.xml?channel_id=UCCcey5CP5GDZeom987gqTdg"
 )
 BBC_YOUTUBE_PREVIOUS_URL_FILE = "data_files/bbc_youtube_previous_url.txt"
+CNN_RSS_URL = "http://feeds.cnn.co.jp/rss/cnn/cnn.rdf"
+CNN_PREVIOUS_URL_FILE = "data_files/cnn_previous_url.txt"
 
 
 def initialize_previous_url(rss_url: str, file: str):
@@ -31,5 +33,6 @@ if __name__ == "__main__":
     # initialize_previous_url(NHK_RSS_URL, NHK_PREVIOUS_URL_FILE)
     # initialize_previous_url(ASAHI_RSS_URL,ASAHI_PREVIOUS_URL_FILE)
     # initialize_previous_url(SANKEI_RSS_URL, SANKEI_PREVIOUS_URL_FILE)
-    initialize_previous_url(BBC_WEB_RSS_URL, BBC_WEB_PREVIOUS_URL_FILE)
-    initialize_previous_url(BBC_YOUTUBE_RSS_URL, BBC_YOUTUBE_PREVIOUS_URL_FILE)
+    # initialize_previous_url(BBC_WEB_RSS_URL, BBC_WEB_PREVIOUS_URL_FILE)
+    # initialize_previous_url(BBC_YOUTUBE_RSS_URL, BBC_YOUTUBE_PREVIOUS_URL_FILE)
+    initialize_previous_url(CNN_RSS_URL, CNN_PREVIOUS_URL_FILE)
