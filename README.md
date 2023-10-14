@@ -24,6 +24,8 @@ docker compose up -d --build
 docker exec truth-bot python -u initialize.py
 docker exec truth-bot python -u nhk_news_bot.py
 docker exec truth-bot python -u asahi_sankei_news_bot.py
+docker exec truth-bot python -u bbc_news.py
+docker exec truth-bot python -u cnn_news_bot.py
 ```
 
 
