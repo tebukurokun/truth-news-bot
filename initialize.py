@@ -26,6 +26,10 @@ def initialize_previous_url(rss_url: str, file: str):
     rss_entries = rss_data.entries
     urls = [entry.link for entry in rss_entries]
 
+    with open(file, "w", encoding="utf-8"):
+        # 内容を消去.
+        pass
+
     save_new_article_urls(urls, file)
 
 
