@@ -3,6 +3,7 @@ name = "truth-news-bot"
 version = "0.1.5"
 description = "News bot for Truth Social"
 authors = ["tebukuro <58774766+tebukurokun@users.noreply.github.com>"]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.9"
