@@ -1,4 +1,3 @@
-version: '3'
 services:
   truth-bot:
     container_name: "truth-bot"

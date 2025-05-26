@@ -109,6 +109,8 @@ class Api:
         # Will also sleep
         self._check_ratelimit(resp)
 
+        logger.info(vars(resp))
+
         return resp.json()
 
     def compose_truth(self, message: str):

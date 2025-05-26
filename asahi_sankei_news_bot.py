@@ -1,6 +1,6 @@
 import time
 import os
-from news_feeder import get_updated_articles
+from news_feeder import get_updated_articles, save_new_article_urls
 from truth_social import compose_truth
 from logging import getLogger, StreamHandler, DEBUG, FileHandler
 from dotenv import load_dotenv
@@ -45,6 +45,11 @@ def publish():
         )
         time.sleep(10)
 
+    # 成功したら投稿済みurlとして保存.
+    save_new_article_urls(
+        [article.link for article in asahi_updated_articles], ASAHI_PREVIOUS_URL_FILE
+    )
+
     sankei_updated_articles = get_updated_articles(
         SANKEI_RSS_URL, SANKEI_PREVIOUS_URL_FILE
     )
@@ -62,6 +67,11 @@ def publish():
             ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, ASAHI_SANKEI_TOKEN, content
         )
         time.sleep(10)
+
+    # 成功したら投稿済みurlとして保存.
+    save_new_article_urls(
+        [article.link for article in sankei_updated_articles], SANKEI_PREVIOUS_URL_FILE
+    )
 
 
 if __name__ == "__main__":

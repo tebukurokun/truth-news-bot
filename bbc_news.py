@@ -1,6 +1,6 @@
 import time
 import os
-from news_feeder import get_updated_articles
+from news_feeder import get_updated_articles, save_new_article_urls
 from truth_social import compose_truth
 from logging import getLogger, StreamHandler, DEBUG, FileHandler
 from dotenv import load_dotenv
@@ -42,6 +42,11 @@ def publish():
         compose_truth(BBC_USERNAME, BBC_PASSWORD, BBC_TOKEN, content)
         time.sleep(10)
 
+    # 成功したら投稿済みurlとして保存.
+    save_new_article_urls(
+        [article.link for article in web_updated_articles], WEB_PREVIOUS_URL_FILE
+    )
+
     # youtube
     youtube_updated_articles = get_updated_articles(
         YOUTUBE_RSS_URL, YOUTUBE_PREVIOUS_URL_FILE
@@ -55,6 +60,11 @@ def publish():
         content = f"{article.title}\n{article.link}\n#inkei_news"
         compose_truth(BBC_USERNAME, BBC_PASSWORD, BBC_TOKEN, content)
         time.sleep(10)
+
+    # 成功したら投稿済みurlとして保存.
+    save_new_article_urls(
+        [article.link for article in youtube_updated_articles], YOUTUBE_PREVIOUS_URL_FILE
+    )
 
 
 if __name__ == "__main__":

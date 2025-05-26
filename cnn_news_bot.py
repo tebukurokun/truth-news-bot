@@ -4,7 +4,7 @@ from logging import getLogger, StreamHandler, DEBUG, FileHandler
 
 from dotenv import load_dotenv
 
-from news_feeder import get_updated_articles
+from news_feeder import get_updated_articles, save_new_article_urls
 from truth_social import compose_truth
 
 logger = getLogger(__name__)
@@ -37,6 +37,11 @@ def publish():
         content = f"{article.title}\n{article.link}\n#inkei_news"
         compose_truth(CNN_USERNAME, CNN_PASSWORD, CNN_TOKEN, content)
         time.sleep(10)
+
+    # 成功したら投稿済みurlとして保存.
+    save_new_article_urls(
+        [article.link for article in updated_articles], PREVIOUS_URL_FILE
+    )
 
 
 if __name__ == "__main__":

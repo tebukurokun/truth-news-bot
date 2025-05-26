@@ -27,12 +27,14 @@ def compose_truth(username: str, password: str, token: str, message: str):
         password,
         token,
     )
-    logger.debug(json.dumps(api.compose_truth(message)))
+
+    api.compose_truth(message)
 
 
 if __name__ == '__main__':
     compose_truth(
         "test",
         os.getenv("TEST_TRUTHSOCIAL_USERNAME"),
-        os.getenv("TEST_TRUTHSOCIAL_PASSWORD")
+        os.getenv("TEST_TRUTHSOCIAL_PASSWORD"),
+        "test"
     )
