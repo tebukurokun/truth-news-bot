@@ -56,6 +56,7 @@ def publish():
 
     if not sankei_updated_articles:
         logger.debug("no article (sankei)")
+        return
 
     for article in sankei_updated_articles:
         if article.title.startswith("【"):

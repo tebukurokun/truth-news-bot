@@ -35,6 +35,7 @@ def publish():
 
     if not web_updated_articles:
         logger.debug("no article (bbc web)")
+        return
 
     for article in web_updated_articles:
         logger.debug(f"bbc web: {article.title}")

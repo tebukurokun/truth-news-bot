@@ -31,6 +31,7 @@ def publish():
 
     if not updated_articles:
         logger.debug("no article (cnn)")
+        return
 
     for article in updated_articles:
         logger.debug(f"cnn: {article.title}")
