@@ -31,12 +31,19 @@ def publish():
     for article in updated_articles:
         logger.debug(f'nhk: {article.title}')
         content = f'{article.title}\n{article.link}\n#nhk_news #inkei_news'
-        compose_truth(NHK_USERNAME, NHK_PASSWORD, NHK_TOKEN, content)
 
-        # 成功したら投稿済みurlとして保存.
-        save_new_article_url(article.link, PREVIOUS_URL_FILE)
+        try:
+            compose_truth(
+                NHK_USERNAME, NHK_PASSWORD, NHK_TOKEN, content
+            )
+            # 成功したら投稿済みurlとして保存.
+            save_new_article_url(article.link, PREVIOUS_URL_FILE)
 
-        time.sleep(10)
+        except Exception as e:
+            logger.error(f"Failed to post article: {e}")
+            continue
+        finally:
+            time.sleep(10)
 
 
 if __name__ == '__main__':
