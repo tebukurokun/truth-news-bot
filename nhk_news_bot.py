@@ -1,8 +1,9 @@
-import time
 import os
-from news_feeder import get_updated_articles, save_new_article_urls
-from truth_social import compose_truth
+import time
 from logging import getLogger, StreamHandler, DEBUG, FileHandler
+
+from news_feeder import get_updated_articles, save_new_article_url
+from truth_social import compose_truth
 
 logger = getLogger(__name__)
 handler = StreamHandler()
@@ -13,15 +14,15 @@ logger.addHandler(handler)
 logger.addHandler(handler2)
 logger.propagate = False
 
-NHK_RSS_URL = 'https://www3.nhk.or.jp/rss/news/cat0.xml'
-NHK_PREVIOUS_URL_FILE = 'data_files/nhk_previous_url.txt'
+RSS_URL = 'https://www3.nhk.or.jp/rss/news/cat0.xml'
+PREVIOUS_URL_FILE = 'data_files/nhk_previous_url.txt'
 NHK_USERNAME = os.getenv("NHK_TRUTHSOCIAL_USERNAME")
 NHK_PASSWORD = os.getenv("NHK_TRUTHSOCIAL_PASSWORD")
 NHK_TOKEN = os.getenv("NHK_TRUTHSOCIAL_TOKEN")
 
 
 def publish():
-    updated_articles = get_updated_articles(NHK_RSS_URL, NHK_PREVIOUS_URL_FILE)
+    updated_articles = get_updated_articles(RSS_URL, PREVIOUS_URL_FILE)
 
     if not updated_articles:
         logger.debug("no article(nhk)")
@@ -31,12 +32,11 @@ def publish():
         logger.debug(f'nhk: {article.title}')
         content = f'{article.title}\n{article.link}\n#nhk_news #inkei_news'
         compose_truth(NHK_USERNAME, NHK_PASSWORD, NHK_TOKEN, content)
-        time.sleep(10)
 
-    # 成功したら投稿済みurlとして保存.
-    save_new_article_urls(
-        [article.link for article in updated_articles], NHK_PREVIOUS_URL_FILE
-    )
+        # 成功したら投稿済みurlとして保存.
+        save_new_article_url(article.link, PREVIOUS_URL_FILE)
+
+        time.sleep(10)
 
 
 if __name__ == '__main__':

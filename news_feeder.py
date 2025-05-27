@@ -30,6 +30,11 @@ def save_new_article_urls(mew_urls: list[str], previous_url_file: str):
         txt_file.write("\n".join(mew_urls) + "\n")
 
 
+def save_new_article_url(new_url: str, previous_url_file: str):
+    with open(previous_url_file, "a", encoding="utf-8") as txt_file:
+        txt_file.write(new_url + "\n")
+
+
 def get_updated_articles(url: str, previous_url_file: str) -> List[Article]:
     """
     更新された記事を取得.

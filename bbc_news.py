@@ -1,9 +1,11 @@
-import time
 import os
-from news_feeder import get_updated_articles, save_new_article_urls
-from truth_social import compose_truth
+import time
 from logging import getLogger, StreamHandler, DEBUG, FileHandler
+
 from dotenv import load_dotenv
+
+from news_feeder import get_updated_articles, save_new_article_url
+from truth_social import compose_truth
 
 logger = getLogger(__name__)
 handler = StreamHandler()
@@ -41,12 +43,11 @@ def publish():
         logger.debug(f"bbc web: {article.title}")
         content = f"{article.title}\n{article.link}\n#inkei_news"
         compose_truth(BBC_USERNAME, BBC_PASSWORD, BBC_TOKEN, content)
-        time.sleep(10)
 
-    # 成功したら投稿済みurlとして保存.
-    save_new_article_urls(
-        [article.link for article in web_updated_articles], WEB_PREVIOUS_URL_FILE
-    )
+        # 成功したら投稿済みurlとして保存.
+        save_new_article_url(article.link, WEB_PREVIOUS_URL_FILE)
+
+        time.sleep(10)
 
     # youtube
     youtube_updated_articles = get_updated_articles(
@@ -60,12 +61,11 @@ def publish():
         logger.debug(f"bbc youtube: {article.title}")
         content = f"{article.title}\n{article.link}\n#inkei_news"
         compose_truth(BBC_USERNAME, BBC_PASSWORD, BBC_TOKEN, content)
-        time.sleep(10)
 
-    # 成功したら投稿済みurlとして保存.
-    save_new_article_urls(
-        [article.link for article in youtube_updated_articles], YOUTUBE_PREVIOUS_URL_FILE
-    )
+        # 成功したら投稿済みurlとして保存.
+        save_new_article_url(article.link, YOUTUBE_PREVIOUS_URL_FILE)
+
+        time.sleep(10)
 
 
 if __name__ == "__main__":

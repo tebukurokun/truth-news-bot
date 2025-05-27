@@ -1,9 +1,11 @@
-import time
 import os
-from news_feeder import get_updated_articles, save_new_article_urls
-from truth_social import compose_truth
+import time
 from logging import getLogger, StreamHandler, DEBUG, FileHandler
+
 from dotenv import load_dotenv
+
+from news_feeder import get_updated_articles, save_new_article_url
+from truth_social import compose_truth
 
 logger = getLogger(__name__)
 handler = StreamHandler()
@@ -27,6 +29,7 @@ ASAHI_SANKEI_TOKEN = os.getenv("ASAHI_SANKEI_TRUTHSOCIAL_TOKEN")
 
 
 def publish():
+    # asahi
     asahi_updated_articles = get_updated_articles(
         ASAHI_RSS_URL, ASAHI_PREVIOUS_URL_FILE
     )
@@ -43,13 +46,13 @@ def publish():
         compose_truth(
             ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, ASAHI_SANKEI_TOKEN, content
         )
+
+        # 成功したら投稿済みurlとして保存.
+        save_new_article_url(article.link, ASAHI_PREVIOUS_URL_FILE)
+
         time.sleep(10)
 
-    # 成功したら投稿済みurlとして保存.
-    save_new_article_urls(
-        [article.link for article in asahi_updated_articles], ASAHI_PREVIOUS_URL_FILE
-    )
-
+    # sankei
     sankei_updated_articles = get_updated_articles(
         SANKEI_RSS_URL, SANKEI_PREVIOUS_URL_FILE
     )
@@ -67,12 +70,11 @@ def publish():
         compose_truth(
             ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, ASAHI_SANKEI_TOKEN, content
         )
-        time.sleep(10)
 
-    # 成功したら投稿済みurlとして保存.
-    save_new_article_urls(
-        [article.link for article in sankei_updated_articles], SANKEI_PREVIOUS_URL_FILE
-    )
+        # 成功したら投稿済みurlとして保存.
+        save_new_article_url(article.link, SANKEI_PREVIOUS_URL_FILE)
+
+        time.sleep(10)
 
 
 if __name__ == "__main__":
