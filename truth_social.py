@@ -1,8 +1,9 @@
-from truthbrush.api import Api
-import json
 import os
-from dotenv import load_dotenv
 from logging import getLogger, StreamHandler, DEBUG, FileHandler, Formatter
+
+from dotenv import load_dotenv
+
+from truthbrush.api import Api
 
 logger = getLogger(__name__)
 
@@ -28,7 +29,8 @@ def compose_truth(username: str, password: str, token: str, message: str):
         token,
     )
 
-    api.compose_truth(message)
+    response = api.compose_truth(message)
+    logger.debug(vars(response))
 
 
 if __name__ == '__main__':
