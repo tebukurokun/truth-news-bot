@@ -62,9 +62,13 @@ def publish():
 
         logger.debug(f"asahi_sankei: {article.title}")
         content = f"{article.title}\n{article.link}\n#inkei_news"
-        compose_truth(
-            ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, ASAHI_SANKEI_TOKEN, content
-        )
+        try:
+            compose_truth(
+                ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, ASAHI_SANKEI_TOKEN, content
+            )
+        except Exception as e:
+            logger.error(f"Failed to post article: {e}")
+            continue
 
         # 成功したら投稿済みurlとして保存.
         save_new_article_url(article.link, previous_url_file)
