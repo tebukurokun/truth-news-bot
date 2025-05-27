@@ -66,14 +66,14 @@ def publish():
             compose_truth(
                 ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, ASAHI_SANKEI_TOKEN, content
             )
+            # 成功したら投稿済みurlとして保存.
+            save_new_article_url(article.link, previous_url_file)
+
         except Exception as e:
             logger.error(f"Failed to post article: {e}")
             continue
-
-        # 成功したら投稿済みurlとして保存.
-        save_new_article_url(article.link, previous_url_file)
-
-        time.sleep(10)
+        finally:
+            time.sleep(10)
 
 
 if __name__ == "__main__":
