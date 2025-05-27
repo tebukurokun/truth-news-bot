@@ -50,7 +50,7 @@ def publish():
         return
 
     updated_articles = asahi_updated_articles + sankei_updated_articles
-    sampled_articles = random.sample(updated_articles, min(4, len(updated_articles)))
+    sampled_articles = random.sample(updated_articles, min(5, len(updated_articles)))
 
     for article in sampled_articles:
         previous_url_file = ASAHI_PREVIOUS_URL_FILE if 'asahi.com' in article.link else SANKEI_PREVIOUS_URL_FILE
