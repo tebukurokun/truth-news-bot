@@ -1,4 +1,5 @@
 import os
+import random
 import time
 from logging import getLogger, StreamHandler, DEBUG, FileHandler
 
@@ -37,21 +38,6 @@ def publish():
     if not asahi_updated_articles:
         logger.debug("no article (asahi)")
 
-    for article in asahi_updated_articles:
-        if article.title.startswith("【"):
-            continue
-
-        logger.debug(f"asahi: {article.title}")
-        content = f"{article.title}\n{article.link}\n#inkei_news"
-        compose_truth(
-            ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, ASAHI_SANKEI_TOKEN, content
-        )
-
-        # 成功したら投稿済みurlとして保存.
-        save_new_article_url(article.link, ASAHI_PREVIOUS_URL_FILE)
-
-        time.sleep(10)
-
     # sankei
     sankei_updated_articles = get_updated_articles(
         SANKEI_RSS_URL, SANKEI_PREVIOUS_URL_FILE
@@ -59,20 +45,29 @@ def publish():
 
     if not sankei_updated_articles:
         logger.debug("no article (sankei)")
+
+    if not asahi_updated_articles and not sankei_updated_articles:
         return
 
-    for article in sankei_updated_articles:
+    updated_articles = asahi_updated_articles + sankei_updated_articles
+    sampled_articles = random.sample(updated_articles, min(4, len(updated_articles)))
+
+    for article in sampled_articles:
+        previous_url_file = ASAHI_PREVIOUS_URL_FILE if 'asahi.com' in article.link else SANKEI_PREVIOUS_URL_FILE
+
         if article.title.startswith("【"):
+            # "【" のときも投稿済みurlとして保存.
+            save_new_article_url(article.link, previous_url_file)
             continue
 
-        logger.debug(f"sankei: {article.title}")
+        logger.debug(f"asahi_sankei: {article.title}")
         content = f"{article.title}\n{article.link}\n#inkei_news"
         compose_truth(
             ASAHI_SANKEI_USERNAME, ASAHI_SANKEI_PASSWORD, ASAHI_SANKEI_TOKEN, content
         )
 
         # 成功したら投稿済みurlとして保存.
-        save_new_article_url(article.link, SANKEI_PREVIOUS_URL_FILE)
+        save_new_article_url(article.link, previous_url_file)
 
         time.sleep(10)
 
