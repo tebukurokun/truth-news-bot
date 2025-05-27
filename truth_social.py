@@ -29,8 +29,7 @@ def compose_truth(username: str, password: str, token: str, message: str):
         token,
     )
 
-    response = api.compose_truth(message)
-    logger.debug(vars(response))
+    api.compose_truth(message)
 
 
 if __name__ == '__main__':
