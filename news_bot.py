@@ -165,5 +165,6 @@ if __name__ == "__main__":
     while True:
         try:
             publish()
+            time.sleep(30)
         except Exception as exception:
             logger.error(f"Unexpected error: {exception}")
