@@ -1,17 +1,16 @@
-from time import sleep
-from typing import Any, Iterator, List, Optional
-from urllib.error import HTTPError
-
-from loguru import logger
-from dateutil import parser as date_parse
-from datetime import datetime, timezone, date
-from curl_cffi import requests
 import json
 import logging
 import os
+from datetime import datetime, timezone, date
+from time import sleep
+from typing import Any, Iterator, List, Optional
+
+from curl_cffi import requests
+from dateutil import parser as date_parse
+from loguru import logger
 
 logging.basicConfig(
-    level = (
+    level=(
         logging.DEBUG
         if os.getenv("DEBUG") and os.getenv("DEBUG").lower() != "false"
         else logging.INFO
@@ -68,9 +67,9 @@ class Api:
         if (
             self.ratelimit_remaining is not None and self.ratelimit_remaining <= 50
         ):  # We do 50 to be safe; their tracking is a bit stochastic... it can jump down quickly
-            now = datetime.utcnow().replace(tzinfo = timezone.utc)
+            now = datetime.utcnow().replace(tzinfo=timezone.utc)
             time_to_sleep = (
-                self.ratelimit_reset.replace(tzinfo = timezone.utc) - now
+                self.ratelimit_reset.replace(tzinfo=timezone.utc) - now
             ).total_seconds()
             logger.warning(
                 f"Approaching rate limit; sleeping for {time_to_sleep} seconds..."
@@ -80,10 +79,10 @@ class Api:
     def _get(self, url: str, params: dict = None) -> Any:
         resp = self._make_session().get(
             API_BASE_URL + url,
-            params = params,
-            proxies = proxies,
-            impersonate = "chrome110",
-            headers = {
+            params=params,
+            proxies=proxies,
+            impersonate="chrome110",
+            headers={
                 "Authorization": "Bearer " + self.auth_id,
                 "User-Agent": USER_AGENT,
             },
@@ -97,10 +96,10 @@ class Api:
     def _post(self, url: str, params: dict = None) -> Any:
         resp = self._make_session().post(
             API_BASE_URL + url,
-            params = params,
-            proxies = proxies,
-            impersonate = "chrome110",
-            headers = {
+            params=params,
+            proxies=proxies,
+            impersonate="chrome110",
+            headers={
                 "Authorization": "Bearer " + self.auth_id,
                 "User-Agent": USER_AGENT,
             },
@@ -126,20 +125,20 @@ class Api:
         while next_link is not None:
             resp = self._make_session().get(
                 next_link,
-                params = params,
-                proxies = proxies,
-                impersonate = "chrome110",
-                headers = {
+                params=params,
+                proxies=proxies,
+                impersonate="chrome110",
+                headers={
                     "Authorization": "Bearer " + self.auth_id,
                     "User-Agent": USER_AGENT,
                 },
             )
-            link_header = resp.headers.get('Link', '')
+            link_header = resp.headers.get("Link", "")
             next_link = None
-            for link in link_header.split(','):
-                parts = link.split(';')
+            for link in link_header.split(","):
+                parts = link.split(";")
                 if len(parts) == 2 and parts[1].strip() == 'rel="next"':
-                    next_link = parts[0].strip('<>')
+                    next_link = parts[0].strip("<>")
                     break
             logger.info(f"Next: {next_link}, resp: {resp}, headers: {resp.headers}")
             yield resp.json()
@@ -152,7 +151,7 @@ class Api:
 
         self.__check_login()
         assert user_handle is not None
-        return self._get("/v1/accounts/lookup", params = dict(acct = user_handle))
+        return self._get("/v1/accounts/lookup", params=dict(acct=user_handle))
 
     def search(
         self,
@@ -174,27 +173,27 @@ class Api:
             if max_id is None:
                 resp = self._get(
                     "/v2/search",
-                    params = dict(
-                        q = query,
-                        resolve = resolve,
-                        limit = limit,
-                        type = searchtype,
-                        offset = offset,
-                        min_id = min_id,
+                    params=dict(
+                        q=query,
+                        resolve=resolve,
+                        limit=limit,
+                        type=searchtype,
+                        offset=offset,
+                        min_id=min_id,
                     ),
                 )
 
             else:
                 resp = self._get(
                     "/v2/search",
-                    params = dict(
-                        q = query,
-                        resolve = resolve,
-                        limit = limit,
-                        type = searchtype,
-                        offset = offset,
-                        min_id = min_id,
-                        max_id = max_id,
+                    params=dict(
+                        q=query,
+                        resolve=resolve,
+                        limit=limit,
+                        type=searchtype,
+                        offset=offset,
+                        min_id=min_id,
+                        max_id=max_id,
                     ),
                 )
 
@@ -238,7 +237,7 @@ class Api:
 
         n_output = 0
         for followers_batch in self._get_paginated(
-            f"/v1/accounts/{user_id}/followers", resume = resume
+            f"/v1/accounts/{user_id}/followers", resume=resume
         ):
             for f in followers_batch:
                 yield f
@@ -258,7 +257,7 @@ class Api:
 
         n_output = 0
         for followers_batch in self._get_paginated(
-            f"/v1/accounts/{user_id}/following", resume = resume
+            f"/v1/accounts/{user_id}/following", resume=resume
         ):
             for f in followers_batch:
                 yield f
@@ -278,7 +277,7 @@ class Api:
                 url = f"/v1/accounts/{id}/statuses"
                 if not replies:
                     url += "?exclude_replies=true"
-                result = self._get(url, params = params)
+                result = self._get(url, params=params)
             except json.JSONDecodeError as e:
                 logger.error(f"Unable to pull user #{id}'s statuses': {e}")
                 break
@@ -298,12 +297,12 @@ class Api:
             if not isinstance(result, list):
                 logger.error(f"Result is not a list (it's a {type(result)}): {result}")
 
-            posts = sorted(result, key = lambda k: k["id"])
+            posts = sorted(result, key=lambda k: k["id"])
             params["max_id"] = posts[0]["id"]
 
             most_recent_date = (
                 date_parse.parse(posts[-1]["created_at"])
-                .replace(tzinfo = timezone.utc)
+                .replace(tzinfo=timezone.utc)
                 .date()
             )
             if created_after and most_recent_date < created_after:
@@ -314,7 +313,7 @@ class Api:
                 post["_pulled"] = datetime.now().isoformat()
                 date_created = (
                     date_parse.parse(post["created_at"])
-                    .replace(tzinfo = timezone.utc)
+                    .replace(tzinfo=timezone.utc)
                     .date()
                 )
                 if created_after and date_created < created_after:
@@ -339,9 +338,9 @@ class Api:
             sess_req = requests.request(
                 "POST",
                 url,
-                json = payload,
-                proxies = proxies,
-                headers = {
+                json=payload,
+                proxies=proxies,
+                headers={
                     "user-agent": USER_AGENT,
                 },
             )
