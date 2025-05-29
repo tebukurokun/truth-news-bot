@@ -102,7 +102,12 @@ def publish():
         content = f"{article.title}\n{article.link}\n#nhk_news #inkei_news"
 
         try:
-            compose_truth(NHK_USERNAME, NHK_PASSWORD, NHK_TOKEN, content)
+            compose_truth(
+                ASAHI_SANKEI_USERNAME,
+                ASAHI_SANKEI_PASSWORD,
+                ASAHI_SANKEI_TOKEN,
+                content,
+            )
             save_new_article_url(article.link, NHK_PREVIOUS_URL_FILE)
             logger.info(f"Posted asahi sankei article: {article.title}")
 
