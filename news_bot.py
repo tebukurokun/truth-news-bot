@@ -81,7 +81,7 @@ def publish():
         and not bbc_updated_articles
         and not cnn_updated_articles
     ):
-        logger.debug("no article (nhk, asahi, sankei)")
+        logger.debug("no article")
         return
 
     for article in nhk_updated_articles:
