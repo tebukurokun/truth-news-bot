@@ -161,4 +161,8 @@ def publish():
 
 
 if __name__ == "__main__":
-    publish()
+    while True:
+        try:
+            publish()
+        except Exception as exception:
+            logger.error(f"Unexpected error: {exception}")
