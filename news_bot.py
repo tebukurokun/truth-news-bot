@@ -99,6 +99,17 @@ def publish():
             time.sleep(10)
 
     for article in asahi_sankei_updated_articles:
+        previous_url_file = (
+            ASAHI_PREVIOUS_URL_FILE
+            if "asahi.com" in article.link
+            else SANKEI_PREVIOUS_URL_FILE
+        )
+
+        if article.title.startswith("【"):
+            # "【" のときも投稿済みurlとして保存.
+            save_new_article_url(article.link, previous_url_file)
+            continue
+
         content = f"{article.title}\n{article.link}\n#nhk_news #inkei_news"
 
         try:
@@ -108,7 +119,7 @@ def publish():
                 ASAHI_SANKEI_TOKEN,
                 content,
             )
-            save_new_article_url(article.link, NHK_PREVIOUS_URL_FILE)
+            save_new_article_url(article.link, previous_url_file)
             logger.info(f"Posted asahi sankei article: {article.title}")
 
         except Exception as e:
