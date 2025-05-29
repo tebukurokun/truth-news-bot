@@ -55,10 +55,6 @@ def get_updated_articles(url: str, previous_url_file: str) -> List[Article]:
         if entry.link not in past_urls:
             updated_entries.append(Article(entry.title, entry.link))
 
-    if updated_entries:
-        # 5件まで取得.それより多い分は次の実行で取得される
-        updated_entries = updated_entries[:5]
-
     return updated_entries
 
 
