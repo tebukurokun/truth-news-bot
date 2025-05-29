@@ -40,11 +40,11 @@ ASAHI_SANKEI_PASSWORD = os.getenv("ASAHI_SANKEI_TRUTHSOCIAL_PASSWORD")
 ASAHI_SANKEI_TOKEN = os.getenv("ASAHI_SANKEI_TRUTHSOCIAL_TOKEN")
 
 BBC_WEB_RSS_URL = "http://feeds.bbci.co.uk/japanese/rss.xml"
-BBC_WWEB_PREVIOUS_URL_FILE = "data_files/bbc_web_previous_url.txt"
-BBC_WYOUTUBE_RSS_URL = (
+BBC_WEB_PREVIOUS_URL_FILE = "data_files/bbc_web_previous_url.txt"
+BBC_YOUTUBE_RSS_URL = (
     "https://www.youtube.com/feeds/videos.xml?channel_id=UCCcey5CP5GDZeom987gqTdg"
 )
-BBC_WYOUTUBE_PREVIOUS_URL_FILE = "data_files/bbc_youtube_previous_url.txt"
+BBC_YOUTUBE_PREVIOUS_URL_FILE = "data_files/bbc_youtube_previous_url.txt"
 BBC_USERNAME = os.getenv("BBC_TRUTHSOCIAL_USERNAME")
 BBC_PASSWORD = os.getenv("BBC_TRUTHSOCIAL_PASSWORD")
 BBC_TOKEN = os.getenv("BBC_TRUTHSOCIAL_TOKEN")
@@ -67,8 +67,8 @@ def publish():
     )
 
     bbc_updated_articles = (lambda x: random.sample(x, min(1, len(x))))(
-        get_updated_articles(BBC_WEB_RSS_URL, BBC_WWEB_PREVIOUS_URL_FILE)
-        + get_updated_articles(BBC_WYOUTUBE_RSS_URL, BBC_WYOUTUBE_PREVIOUS_URL_FILE)
+        get_updated_articles(BBC_WEB_RSS_URL, BBC_WEB_PREVIOUS_URL_FILE)
+        + get_updated_articles(BBC_YOUTUBE_RSS_URL, BBC_YOUTUBE_PREVIOUS_URL_FILE)
     )
 
     cnn_updated_articles = (lambda x: random.sample(x, min(1, len(x))))(
@@ -135,9 +135,9 @@ def publish():
         try:
             compose_truth(BBC_USERNAME, BBC_PASSWORD, BBC_TOKEN, content)
             if "youtube" in article.link:
-                save_new_article_url(article.link, BBC_WYOUTUBE_PREVIOUS_URL_FILE)
+                save_new_article_url(article.link, BBC_YOUTUBE_PREVIOUS_URL_FILE)
             else:
-                save_new_article_url(article.link, BBC_WWEB_PREVIOUS_URL_FILE)
+                save_new_article_url(article.link, BBC_WEB_PREVIOUS_URL_FILE)
             logger.info(f"Posted BBC article: {article.title}")
 
         except Exception as e:
