@@ -14,8 +14,8 @@ logger.addHandler(handler)
 logger.addHandler(handler2)
 logger.propagate = False
 
-RSS_URL = 'https://www3.nhk.or.jp/rss/news/cat0.xml'
-PREVIOUS_URL_FILE = 'data_files/nhk_previous_url.txt'
+RSS_URL = "https://www3.nhk.or.jp/rss/news/cat0.xml"
+PREVIOUS_URL_FILE = "data_files/nhk_previous_url.txt"
 NHK_USERNAME = os.getenv("NHK_TRUTHSOCIAL_USERNAME")
 NHK_PASSWORD = os.getenv("NHK_TRUTHSOCIAL_PASSWORD")
 NHK_TOKEN = os.getenv("NHK_TRUTHSOCIAL_TOKEN")
@@ -29,13 +29,11 @@ def publish():
         return
 
     for article in updated_articles:
-        logger.debug(f'nhk: {article.title}')
-        content = f'{article.title}\n{article.link}\n#nhk_news #inkei_news'
+        logger.debug(f"nhk: {article.title}")
+        content = f"{article.title}\n{article.link}\n#nhk_news #inkei_news"
 
         try:
-            compose_truth(
-                NHK_USERNAME, NHK_PASSWORD, NHK_TOKEN, content
-            )
+            compose_truth(NHK_USERNAME, NHK_PASSWORD, NHK_TOKEN, content)
             # 成功したら投稿済みurlとして保存.
             save_new_article_url(article.link, PREVIOUS_URL_FILE)
 
@@ -46,5 +44,5 @@ def publish():
             time.sleep(10)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     publish()
