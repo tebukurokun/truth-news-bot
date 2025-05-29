@@ -82,6 +82,7 @@ def publish():
         and not cnn_updated_articles
     ):
         logger.debug("no article")
+        time.sleep(60)
         return
 
     for article in nhk_updated_articles:
