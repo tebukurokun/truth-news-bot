@@ -93,7 +93,7 @@ def publish():
             logger.info(f"Posted NHK article: {article.title}")
 
         except Exception as e:
-            logger.error(f"Failed NHK article: {article.title}\n {e}")
+            logger.warning(f"Failed NHK article: {article.title}\n {e}")
             continue
         finally:
             time.sleep(10)
@@ -112,7 +112,7 @@ def publish():
             logger.info(f"Posted asahi sankei article: {article.title}")
 
         except Exception as e:
-            logger.error(f"Failed asahi sankei article: {article.title}\n {e}")
+            logger.warning(f"Failed asahi sankei article: {article.title}\n {e}")
             continue
         finally:
             time.sleep(10)
@@ -129,7 +129,7 @@ def publish():
             logger.info(f"Posted BBC article: {article.title}")
 
         except Exception as e:
-            logger.error(f"Failed BBC article: {article.title}\n {e}")
+            logger.warning(f"Failed BBC article: {article.title}\n {e}")
             continue
         finally:
             time.sleep(10)
@@ -143,7 +143,7 @@ def publish():
             logger.info(f"Posted CNN article: {article.title}")
 
         except Exception as e:
-            logger.error(f"Failed CNN article: {article.title}\n {e}")
+            logger.warning(f"Failed CNN article: {article.title}\n {e}")
             continue
         finally:
             time.sleep(10)
