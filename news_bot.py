@@ -111,7 +111,7 @@ def publish():
             save_new_article_url(article.link, previous_url_file)
             continue
 
-        content = f"{article.title}\n{article.link}\n#nhk_news #inkei_news"
+        content = f"{article.title}\n{article.link}\n #inkei_news"
 
         try:
             compose_truth(
