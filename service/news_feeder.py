@@ -1,19 +1,11 @@
-from dataclasses import dataclass
 from typing import List, Set
 
 import feedparser
 import pytz
 
+from models import Article
+
 JST = pytz.timezone("Asia/Tokyo")
-
-RSS_URL = "https://assets.wor.jp/rss/rdf/sankei/flash.rdf"
-PREVIOUS_URL_FILE = "data_files/sankei_previous_url.txt"
-
-
-@dataclass
-class Article:
-    title: str
-    link: str
 
 
 def _get_past_article_urls(previous_url_file: str) -> Set[str]:
@@ -56,7 +48,3 @@ def get_updated_articles(url: str, previous_url_file: str) -> List[Article]:
             updated_entries.append(Article(entry.title, entry.link))
 
     return updated_entries
-
-
-if __name__ == "__main__":
-    print(get_updated_articles(RSS_URL, PREVIOUS_URL_FILE))

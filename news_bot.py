@@ -5,8 +5,8 @@ from logging import getLogger, StreamHandler, DEBUG, FileHandler, Formatter
 
 from dotenv import load_dotenv
 
-from news_feeder import get_updated_articles, save_new_article_url
-from truth_social import compose_truth
+from service.news_feeder import get_updated_articles, save_new_article_url
+from service.truth_social import compose_truth
 
 logger = getLogger(__name__)
 handler = StreamHandler()

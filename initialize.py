@@ -1,6 +1,6 @@
 import feedparser
 
-from news_feeder import save_new_article_urls
+from service.news_feeder import save_new_article_urls
 
 NHK_RSS_URL = "https://www3.nhk.or.jp/rss/news/cat0.xml"
 NHK_PREVIOUS_URL_FILE = "data_files/nhk_previous_url.txt"
