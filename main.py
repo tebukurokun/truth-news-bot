@@ -38,7 +38,7 @@ def rss_checker():
             for article in articles:
                 article_queue.put((article, 0))
 
-        time.sleep(60)
+        time.sleep(300)
 
 
 def sns_publisher():
