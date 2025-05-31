@@ -199,5 +199,7 @@ def _post_and_save(
             return
         compose_truth(user_name, password, token, content)
         save_new_article_url(article.link, previous_url_file)
+        logger.info(f"Published article: {article.title} - {article.link}")
+
     except Exception as e:
         raise e

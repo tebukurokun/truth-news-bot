@@ -47,7 +47,6 @@ def sns_publisher():
             article, retry_count = article_queue.get(timeout=10)
             try:
                 publish(article)
-                logger.info(f"Published article: {article.title} - {article.link}")
                 article_queue.task_done()
 
             except Exception as e:
