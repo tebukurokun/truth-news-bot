@@ -36,7 +36,7 @@ def get_updated_articles(url: str, previous_url_file: str) -> List[Article]:
     rss_entries = rss_data.entries
 
     # 前回の記事のurlを取得
-    past_urls = _get_past_article_urls(previous_url_file)
+    past_urls = get_past_article_urls(previous_url_file)
 
     updated_entries = []
 
