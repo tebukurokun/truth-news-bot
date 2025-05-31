@@ -6,7 +6,11 @@ from typing import List
 from dotenv import load_dotenv
 
 from models import Media, Article
-from service.news_feeder import get_updated_articles, save_new_article_url
+from service.news_feeder import (
+    get_updated_articles,
+    save_new_article_url,
+    get_past_article_urls,
+)
 from service.truth_social import compose_truth
 
 logger = getLogger(__name__)
@@ -190,6 +194,9 @@ def _post_and_save(
     :param token: Truth Socialのトークン
     """
     try:
+        if article.link in get_past_article_urls(previous_url_file):
+            # 既に投稿済みのURLの場合はスキップ
+            return
         compose_truth(user_name, password, token, content)
         save_new_article_url(article.link, previous_url_file)
         logger.info(f"Posted: {article.title} - {article.link}")

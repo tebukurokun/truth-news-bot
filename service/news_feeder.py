@@ -8,7 +8,7 @@ from models import Article
 JST = pytz.timezone("Asia/Tokyo")
 
 
-def _get_past_article_urls(previous_url_file: str) -> Set[str]:
+def get_past_article_urls(previous_url_file: str) -> Set[str]:
     """
     前回の処理で存在した記事のurlをsetで取得.
     """
