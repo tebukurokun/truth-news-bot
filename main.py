@@ -52,7 +52,7 @@ def sns_publisher():
 
             except Exception as e:
                 logger.warning(
-                    f"Publish failed: {article.title}, retry {retry_count}, error: {e}"
+                    f"Publish failed: {article.title}, retry: {retry_count}, error: {e}"
                 )
 
                 if retry_count < MAX_RETRY:
