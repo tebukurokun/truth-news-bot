@@ -171,9 +171,9 @@ def publish(article: Article):
                 article,
                 content,
                 CNN_PREVIOUS_URL_FILE,
-                BBC_USERNAME,
-                BBC_PASSWORD,
-                BBC_TOKEN,
+                CNN_USERNAME,
+                CNN_PASSWORD,
+                CNN_TOKEN,
             )
 
 

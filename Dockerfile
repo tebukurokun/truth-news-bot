@@ -10,4 +10,4 @@ RUN poetry self add poetry-plugin-export
 RUN poetry export --without-hashes -f requirements.txt > requirements.txt
 RUN pip install -r requirements.txt
 
-RUN poetry install
+RUN poetry install --without dev
