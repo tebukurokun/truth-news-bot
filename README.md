@@ -25,7 +25,7 @@ ASAHI_SANKEI_TRUTHSOCIAL_PASSWORD=bar
 ```bash
 docker compose up -d --build
 docker exec truth-bot python -u initialize.py
-docker exec truth-bot python -u news_bot.py
+docker exec truth-bot python -u main.py
 ```
 
 ## References
