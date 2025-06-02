@@ -123,8 +123,8 @@ def publish(article: Article):
                 else "#sankei_news #inkei_news"
             )
 
-            if article.title.startswith("【"):
-                # "【" のときも投稿済みurlとして保存.
+            if article.title.startswith("【") or article.title.startswith("＜"):
+                # "【" or "＜"のときはスキップし投稿済みurlとして保存.
                 save_new_article_url(article.link, previous_url_file)
                 return
 
