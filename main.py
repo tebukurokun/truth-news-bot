@@ -66,7 +66,7 @@ def sns_publisher():
         except queue.Empty:
             pass
 
-        time.sleep(10)
+        time.sleep(11)
 
 
 if __name__ == "__main__":
