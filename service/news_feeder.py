@@ -1,11 +1,8 @@
 from typing import List, Set
 
 import feedparser
-import pytz
 
 from models import Article
-
-JST = pytz.timezone("Asia/Tokyo")
 
 
 def get_past_article_urls(previous_url_file: str) -> Set[str]:
