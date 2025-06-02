@@ -129,12 +129,18 @@ def publish(article: Article):
                 else SANKEI_PREVIOUS_URL_FILE
             )
 
+            tag = (
+                "#asahi_news #inkei_news"
+                if "asahi.com" in article.link
+                else "#sankei_news #inkei_news"
+            )
+
             if article.title.startswith("【"):
                 # "【" のときも投稿済みurlとして保存.
                 save_new_article_url(article.link, previous_url_file)
                 return
 
-            content = f"{article.title}\n{article.link}\n#inkei_news"
+            content = f"{article.title}\n{article.link}\n{tag}"
 
             _post_and_save(
                 article,
@@ -152,7 +158,7 @@ def publish(article: Article):
                 else BBC_WEB_PREVIOUS_URL_FILE
             )
 
-            content = f"{article.title}\n{article.link}\n#inkei_news"
+            content = f"{article.title}\n{article.link}\n#inkei_news #bbc_news"
 
             _post_and_save(
                 article,
@@ -165,7 +171,7 @@ def publish(article: Article):
 
         case Media.CNN:
 
-            content = f"{article.title}\n{article.link}\n#inkei_news"
+            content = f"{article.title}\n{article.link}\n#inkei_news #cnn_news"
 
             _post_and_save(
                 article,
