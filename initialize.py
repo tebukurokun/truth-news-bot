@@ -33,11 +33,18 @@ def initialize_previous_url(rss_url: str, file: str):
     save_new_article_urls(urls, file)
 
 
-if __name__ == "__main__":
+def initialize_previous_urls():
+    """
+    各RSSの最新記事のURLを取得し、前回のURLファイルを初期化する.
+    """
     initialize_previous_url(NHK_RSS_URL, NHK_PREVIOUS_URL_FILE)
     initialize_previous_url(ASAHI_RSS_URL, ASAHI_PREVIOUS_URL_FILE)
     initialize_previous_url(SANKEI_RSS_URL, SANKEI_PREVIOUS_URL_FILE)
     initialize_previous_url(BBC_WEB_RSS_URL, BBC_WEB_PREVIOUS_URL_FILE)
     initialize_previous_url(BBC_YOUTUBE_RSS_URL, BBC_YOUTUBE_PREVIOUS_URL_FILE)
     initialize_previous_url(CNN_RSS_URL, CNN_PREVIOUS_URL_FILE)
-    initialize_previous_url(NIKKEI_RSS_URL, NIKKEI_PREVIOUS_URL_FILE)
+    # initialize_previous_url(NIKKEI_RSS_URL, NIKKEI_PREVIOUS_URL_FILE)
+
+
+if __name__ == "__main__":
+    initialize_previous_urls()
