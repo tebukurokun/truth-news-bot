@@ -80,19 +80,19 @@ def check_update() -> List[Article]:
     ) + get_updated_articles(BBC_YOUTUBE_RSS_URL, BBC_YOUTUBE_PREVIOUS_URL_FILE)
     bbc_articles = [
         (setattr(article, "media", Media.BBC) or article)
-        for article in random.sample(bbc_articles, min(1, len(bbc_articles)))
+        for article in random.sample(bbc_articles, min(2, len(bbc_articles)))
     ]
 
     cnn_articles = get_updated_articles(CNN_RSS_URL, CNN_PREVIOUS_URL_FILE)
     cnn_articles = [
         (setattr(article, "media", Media.CNN) or article)
-        for article in random.sample(cnn_articles, min(1, len(cnn_articles)))
+        for article in random.sample(cnn_articles, min(2, len(cnn_articles)))
     ]
 
     nikkei_articles = get_updated_articles(NIKKEI_RSS_URL, NIKKEI_PREVIOUS_URL_FILE)
     nikkei_articles = [
         (setattr(article, "media", Media.NIKKEI) or article)
-        for article in random.sample(nikkei_articles, min(1, len(nikkei_articles)))
+        for article in random.sample(nikkei_articles, min(2, len(nikkei_articles)))
     ]
 
     if (
