@@ -12,7 +12,7 @@ logger = setup_logger(__name__)
 article_queue = queue.Queue()
 
 # 最大リトライ回数
-MAX_RETRY = 20
+MAX_RETRY = 10
 
 
 def rss_checker():
