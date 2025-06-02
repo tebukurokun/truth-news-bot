@@ -6,3 +6,4 @@ class Media(Enum):
     ASAHI_SANKEI = "asahi_sankei"
     BBC = "bbc"
     CNN = "cnn"
+    NIKKEI = "nikkei"

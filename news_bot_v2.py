@@ -48,6 +48,12 @@ CNN_USERNAME = os.getenv("CNN_TRUTHSOCIAL_USERNAME")
 CNN_PASSWORD = os.getenv("CNN_TRUTHSOCIAL_PASSWORD")
 CNN_TOKEN = os.getenv("CNN_TRUTHSOCIAL_TOKEN")
 
+NIKKEI_RSS_URL = "https://assets.wor.jp/rss/rdf/nikkei/news.rdf"
+NIKKEI_PREVIOUS_URL_FILE = "data_files/nikkei_previous_url.txt"
+NIKKEI_USERNAME = os.getenv("NIKKEI_TRUTHSOCIAL_USERNAME")
+NIKKEI_PASSWORD = os.getenv("NIKKEI_TRUTHSOCIAL_PASSWORD")
+NIKKEI_TOKEN = os.getenv("NIKKEI_TRUTHSOCIAL_TOKEN")
+
 
 def check_update() -> List[Article]:
     nhk_articles = get_updated_articles(NHK_RSS_URL, NHK_PREVIOUS_URL_FILE)
@@ -83,16 +89,29 @@ def check_update() -> List[Article]:
         for article in random.sample(cnn_articles, min(1, len(cnn_articles)))
     ]
 
+    nikkei_articles = get_updated_articles(NIKKEI_RSS_URL, NIKKEI_PREVIOUS_URL_FILE)
+    nikkei_articles = [
+        (setattr(article, "media", Media.NIKKEI) or article)
+        for article in random.sample(nikkei_articles, min(1, len(nikkei_articles)))
+    ]
+
     if (
         not nhk_articles
         and not asahi_sankei_articles
         and not bbc_articles
         and not cnn_articles
+        and not nikkei_articles
     ):
         logger.debug("no article")
         return []
 
-    return nhk_articles + asahi_sankei_articles + bbc_articles + cnn_articles
+    return (
+        nhk_articles
+        + asahi_sankei_articles
+        + bbc_articles
+        + cnn_articles
+        + nikkei_articles
+    )
 
 
 def publish(article: Article):
@@ -146,7 +165,7 @@ def publish(article: Article):
                 else BBC_WEB_PREVIOUS_URL_FILE
             )
 
-            content = f"{article.title}\n{article.link}\n#inkei_news #bbc_news"
+            content = f"{article.title}\n{article.link}\n#bbc_news #inkei_news"
 
             _post_and_save(
                 article,
@@ -159,7 +178,7 @@ def publish(article: Article):
 
         case Media.CNN:
 
-            content = f"{article.title}\n{article.link}\n#inkei_news #cnn_news"
+            content = f"{article.title}\n{article.link}\n#cnn_news #inkei_news"
 
             _post_and_save(
                 article,
@@ -168,6 +187,18 @@ def publish(article: Article):
                 CNN_USERNAME,
                 CNN_PASSWORD,
                 CNN_TOKEN,
+            )
+
+        case Media.NIKKEI:
+            content = f"{article.title}\n{article.link}\n #nikkei_news #inkei_news"
+
+            _post_and_save(
+                article,
+                content,
+                NIKKEI_PREVIOUS_URL_FILE,
+                NIKKEI_USERNAME,
+                NIKKEI_PASSWORD,
+                NIKKEI_TOKEN,
             )
 
 
