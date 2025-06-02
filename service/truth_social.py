@@ -1,19 +1,9 @@
-import os
-from logging import getLogger, StreamHandler, DEBUG, FileHandler
-
 from dotenv import load_dotenv
 
 from truthbrush.api import Api
+from dotenv import load_dotenv
 
-logger = getLogger(__name__)
-
-handler = StreamHandler()
-handler.setLevel(DEBUG)
-handler2 = FileHandler(filename="/proc/1/fd/1")
-logger.setLevel(DEBUG)
-logger.addHandler(handler)
-logger.addHandler(handler2)
-logger.propagate = False
+from truthbrush.api import Api
 
 load_dotenv()  # take environment variables from .env.
 

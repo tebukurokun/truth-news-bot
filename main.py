@@ -1,26 +1,11 @@
-import os
 import queue
 import threading
 import time
-from logging import getLogger, StreamHandler, DEBUG, FileHandler, Formatter
 
 from news_bot_v2 import check_update, publish
+from utils import setup_logger
 
-logger = getLogger(__name__)
-handler = StreamHandler()
-handler.setLevel(DEBUG)
-
-formatter = Formatter("%(asctime)s %(levelname)s %(name)s %(message)s")
-handler.setFormatter(formatter)
-logger.addHandler(handler)
-
-if os.path.exists("/proc/1/fd/1"):
-    handler2 = FileHandler("/proc/1/fd/1")
-    handler2.setFormatter(formatter)
-    logger.addHandler(handler2)
-
-logger.setLevel(DEBUG)
-logger.propagate = False
+logger = setup_logger(__name__)
 
 
 # queue.Queue()を使用して、記事をキューに入れる

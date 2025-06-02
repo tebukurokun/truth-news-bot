@@ -1,6 +1,5 @@
 import os
 import random
-from logging import getLogger, StreamHandler, DEBUG, FileHandler, Formatter
 from typing import List
 
 from dotenv import load_dotenv
@@ -12,21 +11,10 @@ from service.news_feeder import (
     get_past_article_urls,
 )
 from service.truth_social import compose_truth
+from utils import setup_logger
 
-logger = getLogger(__name__)
-handler = StreamHandler()
-handler.setLevel(DEBUG)
+logger = setup_logger(__name__)
 
-formatter = Formatter("%(asctime)s %(levelname)s %(name)s %(message)s")
-handler.setFormatter(formatter)
-
-handler2 = FileHandler(filename="/proc/1/fd/1")
-handler2.setFormatter(formatter)
-
-logger.setLevel(DEBUG)
-logger.addHandler(handler)
-logger.addHandler(handler2)
-logger.propagate = False
 
 load_dotenv()  # take environment variables from .env.
 
