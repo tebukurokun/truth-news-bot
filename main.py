@@ -57,7 +57,9 @@ def sns_publisher():
                 if retry_count < MAX_RETRY:
                     article_queue.put((article, retry_count + 1))
                 else:
-                    logger.error(f"Max retry exceeded: {article.title}")
+                    logger.error(
+                        f"Max retry exceeded: {article.title} - {article.link}"
+                    )
 
                 article_queue.task_done()
 
