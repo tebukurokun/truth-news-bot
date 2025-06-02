@@ -18,6 +18,8 @@ CNN_RSS_URL = "http://feeds.cnn.co.jp/rss/cnn/cnn.rdf"
 CNN_PREVIOUS_URL_FILE = "data_files/cnn_previous_url.txt"
 NIKKEI_RSS_URL = "https://assets.wor.jp/rss/rdf/nikkei/news.rdf"
 NIKKEI_PREVIOUS_URL_FILE = "data_files/nikkei_previous_url.txt"
+GUARDIAN_RSS_URL = "https://www.theguardian.com/international/rss"
+GUARDIAN_PREVIOUS_URL_FILE = "data_files/guardian_previous_url.txt"
 
 
 def initialize_previous_url(rss_url: str, file: str):
@@ -43,7 +45,8 @@ def initialize_previous_urls():
     initialize_previous_url(BBC_WEB_RSS_URL, BBC_WEB_PREVIOUS_URL_FILE)
     initialize_previous_url(BBC_YOUTUBE_RSS_URL, BBC_YOUTUBE_PREVIOUS_URL_FILE)
     initialize_previous_url(CNN_RSS_URL, CNN_PREVIOUS_URL_FILE)
-    # initialize_previous_url(NIKKEI_RSS_URL, NIKKEI_PREVIOUS_URL_FILE)
+    initialize_previous_url(NIKKEI_RSS_URL, NIKKEI_PREVIOUS_URL_FILE)
+    initialize_previous_url(GUARDIAN_RSS_URL, GUARDIAN_PREVIOUS_URL_FILE)
 
 
 if __name__ == "__main__":

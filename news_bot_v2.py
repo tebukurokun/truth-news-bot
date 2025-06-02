@@ -54,6 +54,12 @@ NIKKEI_USERNAME = os.getenv("NIKKEI_TRUTHSOCIAL_USERNAME")
 NIKKEI_PASSWORD = os.getenv("NIKKEI_TRUTHSOCIAL_PASSWORD")
 NIKKEI_TOKEN = os.getenv("NIKKEI_TRUTHSOCIAL_TOKEN")
 
+GUARDIAN_RSS_URL = "https://www.theguardian.com/international/rss"
+GUARDIAN_PREVIOUS_URL_FILE = "data_files/guardian_previous_url.txt"
+GUARDIAN_USERNAME = os.getenv("GUARDIAN_TRUTHSOCIAL_USERNAME")
+GUARDIAN_PASSWORD = os.getenv("GUARDIAN_TRUTHSOCIAL_PASSWORD")
+GUARDIAN_TOKEN = os.getenv("GUARDIAN_TRUTHSOCIAL_TOKEN")
+
 
 def check_update() -> List[Article]:
     nhk_articles = get_updated_articles(NHK_RSS_URL, NHK_PREVIOUS_URL_FILE)
@@ -95,12 +101,21 @@ def check_update() -> List[Article]:
         for article in random.sample(nikkei_articles, min(2, len(nikkei_articles)))
     ]
 
+    guardian_articles = get_updated_articles(
+        GUARDIAN_RSS_URL, GUARDIAN_PREVIOUS_URL_FILE
+    )
+    guardian_articles = [
+        (setattr(article, "media", Media.GUARDIAN) or article)
+        for article in random.sample(guardian_articles, min(1, len(guardian_articles)))
+    ]
+
     if (
         not nhk_articles
         and not asahi_sankei_articles
         and not bbc_articles
         and not cnn_articles
         and not nikkei_articles
+        and not guardian_articles
     ):
         logger.debug("no article")
         return []
@@ -111,6 +126,7 @@ def check_update() -> List[Article]:
         + bbc_articles
         + cnn_articles
         + nikkei_articles
+        + guardian_articles
     )
 
 
@@ -199,6 +215,18 @@ def publish(article: Article):
                 NIKKEI_USERNAME,
                 NIKKEI_PASSWORD,
                 NIKKEI_TOKEN,
+            )
+
+        case Media.GUARDIAN:
+            content = f"{article.title}\n{article.link}\n#guardian_news #inkei_news"
+
+            _post_and_save(
+                article,
+                content,
+                GUARDIAN_PREVIOUS_URL_FILE,
+                GUARDIAN_USERNAME,
+                GUARDIAN_PASSWORD,
+                GUARDIAN_TOKEN,
             )
 
 
