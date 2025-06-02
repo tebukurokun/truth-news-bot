@@ -1,9 +1,6 @@
 from dotenv import load_dotenv
 
 from truthbrush.api import Api
-from dotenv import load_dotenv
-
-from truthbrush.api import Api
 
 load_dotenv()  # take environment variables from .env.
 
