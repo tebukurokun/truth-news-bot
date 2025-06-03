@@ -71,14 +71,14 @@ def check_update() -> List[Article]:
         for article in random.sample(nhk_articles, min(2, len(nhk_articles)))
     ]
 
-    asahi_sankei_articles = get_updated_articles(
-        ASAHI_RSS_URL, ASAHI_PREVIOUS_URL_FILE
-    ) + get_updated_articles(SANKEI_RSS_URL, SANKEI_PREVIOUS_URL_FILE)
+    asahi_articles = get_updated_articles(ASAHI_RSS_URL, ASAHI_PREVIOUS_URL_FILE)
+    sankei_articles = get_updated_articles(SANKEI_RSS_URL, SANKEI_PREVIOUS_URL_FILE)
     asahi_sankei_articles = [
         (setattr(article, "media", Media.ASAHI_SANKEI) or article)
-        for article in random.sample(
-            asahi_sankei_articles, min(2, len(asahi_sankei_articles))
-        )
+        for article in random.sample(asahi_articles, min(1, len(asahi_articles)))
+    ] + [
+        (setattr(article, "media", Media.ASAHI_SANKEI) or article)
+        for article in random.sample(sankei_articles, min(1, len(sankei_articles)))
     ]
 
     bbc_articles = get_updated_articles(
@@ -86,13 +86,13 @@ def check_update() -> List[Article]:
     ) + get_updated_articles(BBC_YOUTUBE_RSS_URL, BBC_YOUTUBE_PREVIOUS_URL_FILE)
     bbc_articles = [
         (setattr(article, "media", Media.BBC) or article)
-        for article in random.sample(bbc_articles, min(2, len(bbc_articles)))
+        for article in random.sample(bbc_articles, min(1, len(bbc_articles)))
     ]
 
     cnn_articles = get_updated_articles(CNN_RSS_URL, CNN_PREVIOUS_URL_FILE)
     cnn_articles = [
         (setattr(article, "media", Media.CNN) or article)
-        for article in random.sample(cnn_articles, min(2, len(cnn_articles)))
+        for article in random.sample(cnn_articles, min(1, len(cnn_articles)))
     ]
 
     nikkei_articles = get_updated_articles(NIKKEI_RSS_URL, NIKKEI_PREVIOUS_URL_FILE)
