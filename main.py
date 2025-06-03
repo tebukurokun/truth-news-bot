@@ -1,18 +1,22 @@
+import os
 import queue
 import threading
 import time
+
+from dotenv import load_dotenv
 
 from news_bot_v2 import check_update, publish
 from utils import setup_logger
 
 logger = setup_logger(__name__)
+load_dotenv()  # take environment variables from .env.
 
 
 # queue.Queue()を使用して、記事をキューに入れる
 article_queue = queue.Queue()
 
 # 最大リトライ回数
-MAX_RETRY = 10
+MAX_RETRY = int(os.getenv("MAX_RETRY", 10))
 
 
 def rss_checker():
