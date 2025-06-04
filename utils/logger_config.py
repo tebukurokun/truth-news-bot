@@ -1,6 +1,16 @@
 import os
-from logging import getLogger, StreamHandler, FileHandler, DEBUG, Formatter
 from datetime import datetime
+from logging import (
+    getLogger,
+    StreamHandler,
+    FileHandler,
+    DEBUG,
+    Formatter,
+    INFO,
+    WARNING,
+    ERROR,
+    CRITICAL,
+)
 from zoneinfo import ZoneInfo
 
 
@@ -11,6 +21,31 @@ class JSTFormatter(Formatter):
             return dt.strftime(datefmt)
         else:
             return dt.strftime("%Y-%m-%d %H:%M:%S %Z")
+
+
+def get_log_level():
+    """環境変数からログレベルを取得"""
+    level_str = os.getenv("LOG_LEVEL", "INFO").upper()  # デフォルトをINFOに変更
+
+    level_mapping = {
+        "DEBUG": DEBUG,
+        "INFO": INFO,
+        "WARNING": WARNING,
+        "WARN": WARNING,  # WARN も WARNING として扱う
+        "ERROR": ERROR,
+        "CRITICAL": CRITICAL,
+        "FATAL": CRITICAL,  # FATAL も CRITICAL として扱う
+    }
+
+    level = level_mapping.get(level_str, INFO)
+
+    # 設定されたログレベルを起動時に表示（デバッグ用）
+    if level_str in level_mapping:
+        print(f"Log level set to: {level_str}")
+    else:
+        print(f"Invalid LOG_LEVEL '{level_str}', using INFO as default")
+
+    return level
 
 
 def setup_logger(name=__name__):

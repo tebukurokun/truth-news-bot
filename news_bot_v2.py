@@ -1,15 +1,11 @@
 import os
 import random
-from typing import List
+from typing import List, Callable, Optional
 
 from dotenv import load_dotenv
 
 from models import Media, Article
-from service.news_feeder import (
-    get_updated_articles,
-    save_new_article_url,
-    get_past_article_urls,
-)
+from service.news_feeder_v2 import get_articles
 from service.truth_social import compose_truth
 from utils import setup_logger
 
@@ -61,53 +57,32 @@ GUARDIAN_PASSWORD = os.getenv("GUARDIAN_TRUTHSOCIAL_PASSWORD")
 GUARDIAN_TOKEN = os.getenv("GUARDIAN_TRUTHSOCIAL_TOKEN")
 
 
-def check_update() -> List[Article]:
-    nhk_articles = get_updated_articles(NHK_RSS_URL, NHK_PREVIOUS_URL_FILE)
-    nhk_articles = [
-        (
-            setattr(article, "media", Media.NHK)
-            or article  # mediaを設定してArticleを返す
-        )
-        for article in random.sample(nhk_articles, min(2, len(nhk_articles)))
-    ]
-
-    asahi_articles = get_updated_articles(ASAHI_RSS_URL, ASAHI_PREVIOUS_URL_FILE)
-    sankei_articles = get_updated_articles(SANKEI_RSS_URL, SANKEI_PREVIOUS_URL_FILE)
-    asahi_sankei_articles = [
-        (setattr(article, "media", Media.ASAHI_SANKEI) or article)
-        for article in random.sample(asahi_articles, min(1, len(asahi_articles)))
-    ] + [
-        (setattr(article, "media", Media.ASAHI_SANKEI) or article)
-        for article in random.sample(sankei_articles, min(1, len(sankei_articles)))
-    ]
-
-    bbc_articles = get_updated_articles(
-        BBC_WEB_RSS_URL, BBC_WEB_PREVIOUS_URL_FILE
-    ) + get_updated_articles(BBC_YOUTUBE_RSS_URL, BBC_YOUTUBE_PREVIOUS_URL_FILE)
-    bbc_articles = [
-        (setattr(article, "media", Media.BBC) or article)
-        for article in random.sample(bbc_articles, min(1, len(bbc_articles)))
-    ]
-
-    cnn_articles = get_updated_articles(CNN_RSS_URL, CNN_PREVIOUS_URL_FILE)
-    cnn_articles = [
-        (setattr(article, "media", Media.CNN) or article)
-        for article in random.sample(cnn_articles, min(1, len(cnn_articles)))
-    ]
-
-    nikkei_articles = get_updated_articles(NIKKEI_RSS_URL, NIKKEI_PREVIOUS_URL_FILE)
-    nikkei_articles = [
-        (setattr(article, "media", Media.NIKKEI) or article)
-        for article in random.sample(nikkei_articles, min(2, len(nikkei_articles)))
-    ]
-
-    guardian_articles = get_updated_articles(
-        GUARDIAN_RSS_URL, GUARDIAN_PREVIOUS_URL_FILE
+def check_update(is_published: Callable[[str], bool]) -> List[Article]:
+    nhk_articles = _process_articles(
+        NHK_RSS_URL, Media.NHK, is_published, max_articles=2
     )
-    guardian_articles = [
-        (setattr(article, "media", Media.GUARDIAN) or article)
-        for article in random.sample(guardian_articles, min(1, len(guardian_articles)))
-    ]
+
+    asahi_sankei_articles = _process_articles(
+        ASAHI_RSS_URL, Media.ASAHI_SANKEI, is_published, max_articles=1
+    ) + _process_articles(
+        SANKEI_RSS_URL, Media.ASAHI_SANKEI, is_published, max_articles=1
+    )
+
+    bbc_articles = _process_articles(
+        BBC_WEB_RSS_URL, Media.BBC, is_published, max_articles=1
+    ) + _process_articles(BBC_YOUTUBE_RSS_URL, Media.BBC, is_published, max_articles=1)
+
+    cnn_articles = _process_articles(
+        CNN_RSS_URL, Media.CNN, is_published, max_articles=1
+    )
+
+    nikkei_articles = _process_articles(
+        NIKKEI_RSS_URL, Media.NIKKEI, is_published, max_articles=2
+    )
+
+    guardian_articles = _process_articles(
+        GUARDIAN_RSS_URL, Media.GUARDIAN, is_published, max_articles=1
+    )
 
     if (
         not nhk_articles
@@ -130,7 +105,11 @@ def check_update() -> List[Article]:
     )
 
 
-def publish(article: Article):
+def publish(
+    article: Article,
+    is_published: Callable[[str], bool],
+    add_url: Callable[[str, Optional[str], Optional[Media]], bool],
+):
     match article.media:
         case Media.NHK:
             content = f"{article.title}\n{article.link}\n#nhk_news #inkei_news"
@@ -138,20 +117,15 @@ def publish(article: Article):
             _post_and_save(
                 article,
                 content,
-                NHK_PREVIOUS_URL_FILE,
+                article.media,
+                is_published,
+                add_url,
                 NHK_USERNAME,
                 NHK_PASSWORD,
                 NHK_TOKEN,
             )
 
         case Media.ASAHI_SANKEI:
-
-            previous_url_file = (
-                ASAHI_PREVIOUS_URL_FILE
-                if "asahi.com" in article.link
-                else SANKEI_PREVIOUS_URL_FILE
-            )
-
             tag = (
                 "#asahi_news #inkei_news"
                 if "asahi.com" in article.link
@@ -160,7 +134,7 @@ def publish(article: Article):
 
             if article.title.startswith("【") or article.title.startswith("＜"):
                 # "【" or "＜"のときはスキップし投稿済みurlとして保存.
-                save_new_article_url(article.link, previous_url_file)
+                add_url(article.link, article.title, article.media)
                 return
 
             content = f"{article.title}\n{article.link}\n{tag}"
@@ -168,38 +142,36 @@ def publish(article: Article):
             _post_and_save(
                 article,
                 content,
-                previous_url_file,
+                article.media,
+                is_published,
+                add_url,
                 ASAHI_SANKEI_USERNAME,
                 ASAHI_SANKEI_PASSWORD,
                 ASAHI_SANKEI_TOKEN,
             )
 
         case Media.BBC:
-            previous_url_file = (
-                BBC_YOUTUBE_PREVIOUS_URL_FILE
-                if "youtube" in article.link
-                else BBC_WEB_PREVIOUS_URL_FILE
-            )
-
             content = f"{article.title}\n{article.link}\n#bbc_news #inkei_news"
-
             _post_and_save(
                 article,
                 content,
-                previous_url_file,
+                article.media,
+                is_published,
+                add_url,
                 BBC_USERNAME,
                 BBC_PASSWORD,
                 BBC_TOKEN,
             )
 
         case Media.CNN:
-
             content = f"{article.title}\n{article.link}\n#cnn_news #inkei_news"
 
             _post_and_save(
                 article,
                 content,
-                CNN_PREVIOUS_URL_FILE,
+                article.media,
+                is_published,
+                add_url,
                 CNN_USERNAME,
                 CNN_PASSWORD,
                 CNN_TOKEN,
@@ -211,7 +183,9 @@ def publish(article: Article):
             _post_and_save(
                 article,
                 content,
-                NIKKEI_PREVIOUS_URL_FILE,
+                article.media,
+                is_published,
+                add_url,
                 NIKKEI_USERNAME,
                 NIKKEI_PASSWORD,
                 NIKKEI_TOKEN,
@@ -223,17 +197,47 @@ def publish(article: Article):
             _post_and_save(
                 article,
                 content,
-                GUARDIAN_PREVIOUS_URL_FILE,
+                article.media,
+                is_published,
+                add_url,
                 GUARDIAN_USERNAME,
                 GUARDIAN_PASSWORD,
                 GUARDIAN_TOKEN,
             )
 
 
+def _process_articles(
+    rss_url: str,
+    media: Media,
+    is_published: Callable[[str], bool],
+    max_articles: int = 2,
+) -> List[Article]:
+    """記事を取得し、未公開記事からランダムに選択してメディア情報を設定"""
+    articles = get_articles(rss_url)
+
+    # 未公開記事のみをフィルタリング
+    unpublished_articles = [
+        article for article in articles if not is_published(article.link)
+    ]
+
+    # ランダムに指定数を選択
+    selected_articles = random.sample(
+        unpublished_articles, min(max_articles, len(unpublished_articles))
+    )
+
+    # メディア情報を設定
+    for article in selected_articles:
+        article.media = media
+
+    return selected_articles
+
+
 def _post_and_save(
     article: Article,
     content: str,
-    previous_url_file: str,
+    media: Media,
+    is_published: Callable[[str], bool],
+    add_url: Callable[[str, Optional[str], Optional[Media]], bool],
     user_name: str,
     password: str,
     token: str,
@@ -241,17 +245,20 @@ def _post_and_save(
     """
     指定された記事を投稿し、投稿済みのURLを保存する関数.
     :param article: 投稿する記事
-    :param previous_url_file: 投稿済みURLを保存するファイルのパス
+    :param content: 投稿する内容
+    :param media: 記事のメディア情報
+    :param is_published: URLが既に投稿済みかどうかを確認する関数
+    :param add_url: 投稿済みのURLを保存する関数
     :param user_name: Truth Socialのユーザー名
     :param password: Truth Socialのパスワード
     :param token: Truth Socialのトークン
     """
     try:
-        if article.link in get_past_article_urls(previous_url_file):
+        if is_published(article.link):
             # 既に投稿済みのURLの場合はスキップ
             return
         compose_truth(user_name, password, token, content)
-        save_new_article_url(article.link, previous_url_file)
+        add_url(article.link, article.title, media)
         logger.info(f"Published article: {article.title} - {article.link}")
 
     except Exception as e:

@@ -6,6 +6,7 @@ import time
 from dotenv import load_dotenv
 
 from news_bot_v2 import check_update, publish
+from service.url_manager import URLManager
 from utils import setup_logger
 
 logger = setup_logger(__name__)
@@ -18,10 +19,13 @@ article_queue = queue.Queue()
 # 最大リトライ回数
 MAX_RETRY = int(os.getenv("MAX_RETRY", 10))
 
+# URLManager初期化
+url_manager = URLManager()
+
 
 def rss_checker():
     while True:
-        articles = check_update()
+        articles = check_update(url_manager.is_published)
 
         if articles:
             for article in articles:
@@ -35,7 +39,7 @@ def sns_publisher():
         try:
             article, retry_count = article_queue.get(timeout=10)
             try:
-                publish(article)
+                publish(article, url_manager.is_published, url_manager.add_url)
                 article_queue.task_done()
 
             except Exception as e:

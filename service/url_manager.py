@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from datetime import datetime, timedelta
 from typing import Optional
 
+from models import Media
 from utils import setup_logger
 
 logger = setup_logger(__name__)
@@ -72,21 +73,20 @@ class URLManager:
         self,
         url: str,
         title: Optional[str] = None,
-        source: Optional[str] = None,
-        status: str = "published",
+        source: Optional[Media] = None,
     ) -> bool:
         """新しいURLを登録"""
         try:
             with self.get_connection() as conn:
                 conn.execute(
                     """
-                    INSERT INTO published_urls (url, title, source, status) 
-                    VALUES (?, ?, ?, ?)
+                    INSERT INTO published_urls (url, title, source) 
+                    VALUES (?, ?, ?)
                 """,
-                    (url, title, source, status),
+                    (url, title, source.value),
                 )
                 conn.commit()
-                logger.info(f"URL added: {url}")
+                logger.debug(f"URL added: {url}")
                 return True
         except sqlite3.IntegrityError:
             logger.warning(f"URL already exists: {url}")
@@ -147,7 +147,7 @@ class URLManager:
 # 使用例とテスト用のコード
 if __name__ == "__main__":
     # 使用例
-    url_manager = URLManager("test_newsbot.db")
+    url_manager = URLManager()
 
     # URL登録
     url_manager.add_url("https://example.com/article1", "テスト記事1", "tech_news")
