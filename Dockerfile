@@ -1,13 +1,23 @@
 FROM python:3.13-slim
 
+RUN apt-get update && apt-get install -y \
+    sqlite3 \
+    --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
+
+RUN pip install poetry
+
+RUN poetry config virtualenvs.in-project true
+
+# 依存関係ファイルのみを先にコピー（キャッシュ効率化）
+COPY pyproject.toml poetry.lock* ./
+
+RUN poetry install --without dev --no-root
+
 COPY . .
 
-RUN pip install --upgrade pip && pip install poetry
-RUN poetry config virtualenvs.in-project true
-RUN poetry run pip install -U setuptools==57.0.0
-RUN poetry self add poetry-plugin-export
-RUN poetry export --without-hashes -f requirements.txt > requirements.txt
-RUN pip install -r requirements.txt
-
 RUN poetry install --without dev
+
+RUN mkdir -p /app/db

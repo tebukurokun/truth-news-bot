@@ -133,3 +133,5 @@ dmypy.json
 .pyre/
 
 data_files
+
+db

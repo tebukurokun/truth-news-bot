@@ -7,3 +7,12 @@ services:
     restart: always
     volumes:
       - ./data_files:/app/data_files
+      - ./db:/app/db
+    environment:
+      - DATABASE_PATH=/app/db/newsbot.db
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import sqlite3; sqlite3.connect('/app/db/newsbot.db').execute('SELECT 1').fetchone()" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
