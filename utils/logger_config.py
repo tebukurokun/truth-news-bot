@@ -56,9 +56,11 @@ def setup_logger(name=__name__):
     if logger.handlers:
         return logger
 
+    log_level = get_log_level()
+
     # StreamHandler
     handler = StreamHandler()
-    handler.setLevel(DEBUG)
+    handler.setLevel(log_level)
 
     formatter = JSTFormatter("%(asctime)s %(levelname)s %(name)s %(message)s")
     handler.setFormatter(formatter)
@@ -70,7 +72,7 @@ def setup_logger(name=__name__):
         handler2.setFormatter(formatter)
         logger.addHandler(handler2)
 
-    logger.setLevel(DEBUG)
+    logger.setLevel(log_level)
     logger.propagate = False
 
     return logger
