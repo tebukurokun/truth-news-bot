@@ -5,7 +5,7 @@ from typing import List, Callable, Optional
 from dotenv import load_dotenv
 
 from models import Media, Article
-from service.news_feeder_v2 import get_articles
+from service.news_feeder import get_articles
 from service.truth_social import compose_truth
 from utils import setup_logger
 
