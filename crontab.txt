@@ -1,4 +1,0 @@
-*/2 * * * * docker exec truth-bot python -u nhk_news_bot.py
-*/3 * * * * docker exec truth-bot python -u asahi_sankei_news_bot.py
-*/5 * * * * docker exec truth-bot python -u cnn_news_bot.py
-*/7 * * * * docker exec truth-bot python -u bbc_news.py
