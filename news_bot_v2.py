@@ -15,43 +15,35 @@ logger = setup_logger(__name__)
 load_dotenv()  # take environment variables from .env.
 
 NHK_RSS_URL = "https://www3.nhk.or.jp/rss/news/cat0.xml"
-NHK_PREVIOUS_URL_FILE = "data_files/nhk_previous_url.txt"
 NHK_USERNAME = os.getenv("NHK_TRUTHSOCIAL_USERNAME")
 NHK_PASSWORD = os.getenv("NHK_TRUTHSOCIAL_PASSWORD")
 NHK_TOKEN = os.getenv("NHK_TRUTHSOCIAL_TOKEN")
 
 ASAHI_RSS_URL = "https://www.asahi.com/rss/asahi/newsheadlines.rdf"
-ASAHI_PREVIOUS_URL_FILE = "data_files/asahi_previous_url.txt"
 SANKEI_RSS_URL = "https://assets.wor.jp/rss/rdf/sankei/flash.rdf"
-SANKEI_PREVIOUS_URL_FILE = "data_files/sankei_previous_url.txt"
 ASAHI_SANKEI_USERNAME = os.getenv("ASAHI_SANKEI_TRUTHSOCIAL_USERNAME")
 ASAHI_SANKEI_PASSWORD = os.getenv("ASAHI_SANKEI_TRUTHSOCIAL_PASSWORD")
 ASAHI_SANKEI_TOKEN = os.getenv("ASAHI_SANKEI_TRUTHSOCIAL_TOKEN")
 
 BBC_WEB_RSS_URL = "http://feeds.bbci.co.uk/japanese/rss.xml"
-BBC_WEB_PREVIOUS_URL_FILE = "data_files/bbc_web_previous_url.txt"
 BBC_YOUTUBE_RSS_URL = (
     "https://www.youtube.com/feeds/videos.xml?channel_id=UCCcey5CP5GDZeom987gqTdg"
 )
-BBC_YOUTUBE_PREVIOUS_URL_FILE = "data_files/bbc_youtube_previous_url.txt"
 BBC_USERNAME = os.getenv("BBC_TRUTHSOCIAL_USERNAME")
 BBC_PASSWORD = os.getenv("BBC_TRUTHSOCIAL_PASSWORD")
 BBC_TOKEN = os.getenv("BBC_TRUTHSOCIAL_TOKEN")
 
 CNN_RSS_URL = "http://feeds.cnn.co.jp/rss/cnn/cnn.rdf"
-CNN_PREVIOUS_URL_FILE = "data_files/cnn_previous_url.txt"
 CNN_USERNAME = os.getenv("CNN_TRUTHSOCIAL_USERNAME")
 CNN_PASSWORD = os.getenv("CNN_TRUTHSOCIAL_PASSWORD")
 CNN_TOKEN = os.getenv("CNN_TRUTHSOCIAL_TOKEN")
 
 NIKKEI_RSS_URL = "https://assets.wor.jp/rss/rdf/nikkei/news.rdf"
-NIKKEI_PREVIOUS_URL_FILE = "data_files/nikkei_previous_url.txt"
 NIKKEI_USERNAME = os.getenv("NIKKEI_TRUTHSOCIAL_USERNAME")
 NIKKEI_PASSWORD = os.getenv("NIKKEI_TRUTHSOCIAL_PASSWORD")
 NIKKEI_TOKEN = os.getenv("NIKKEI_TRUTHSOCIAL_TOKEN")
 
 GUARDIAN_RSS_URL = "https://www.theguardian.com/international/rss"
-GUARDIAN_PREVIOUS_URL_FILE = "data_files/guardian_previous_url.txt"
 GUARDIAN_USERNAME = os.getenv("GUARDIAN_TRUTHSOCIAL_USERNAME")
 GUARDIAN_PASSWORD = os.getenv("GUARDIAN_TRUTHSOCIAL_PASSWORD")
 GUARDIAN_TOKEN = os.getenv("GUARDIAN_TRUTHSOCIAL_TOKEN")

@@ -78,13 +78,22 @@ class URLManager:
         """新しいURLを登録"""
         try:
             with self.get_connection() as conn:
-                conn.execute(
-                    """
-                    INSERT INTO published_urls (url, title, source) 
-                    VALUES (?, ?, ?)
-                """,
-                    (url, title, source.value),
-                )
+                if source:
+                    conn.execute(
+                        """
+                        INSERT INTO published_urls (url, title, source) 
+                        VALUES (?, ?, ?)
+                    """,
+                        (url, title, source.value),
+                    )
+                else:
+                    conn.execute(
+                        """
+                        INSERT INTO published_urls (url, title) 
+                        VALUES (?, ?)
+                    """,
+                        (url, title),
+                    )
                 conn.commit()
                 logger.debug(f"URL added: {url}")
                 return True

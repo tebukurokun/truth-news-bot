@@ -6,7 +6,6 @@ services:
     env_file: production.env
     restart: always
     volumes:
-      - ./data_files:/app/data_files
       - ./db:/app/db
     environment:
       - DATABASE_PATH=/app/db/newsbot.db
