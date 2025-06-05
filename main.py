@@ -5,7 +5,7 @@ import time
 
 from dotenv import load_dotenv
 
-from news_bot_v2 import check_update, publish
+from news_bot import check_update, publish
 from service.url_manager import URLManager
 from utils import setup_logger
 
