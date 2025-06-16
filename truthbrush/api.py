@@ -102,11 +102,12 @@ class Api:
             headers={
                 "Authorization": "Bearer " + self.auth_id,
                 "User-Agent": USER_AGENT,
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,/;q=0.8",
-                "Accept-Language": "en-US,en;q=0.5",
-                "Accept-Encoding": "gzip, deflate, br",
-                "Connection": "keep-alive",
+                "Accept": "application/json, text/plain, */*",
+                "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
+                "Accept-Encoding": "gzip, deflate, br, zstd",
                 "Upgrade-Insecure-Requests": "1",
+                "Referer": "https://truthsocial.com/",
+                "Origin": "https://truthsocial.com",
             },
         )
 
