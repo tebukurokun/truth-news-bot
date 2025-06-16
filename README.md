@@ -22,9 +22,20 @@ ASAHI_SANKEI_TRUTHSOCIAL_PASSWORD=bar
 
 ## usage
 
+- run
 ```bash
 docker compose up -d --build
 docker exec -d truth-bot poetry run python -u main.py
+```
+
+- log
+```bash
+docker logs truth-bot --tail=100
+```
+
+- reset url data
+```bash
+docker exec -d truth-bot poetry run python -u initialize.py
 ```
 
 ## References
