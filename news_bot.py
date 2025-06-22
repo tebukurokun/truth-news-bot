@@ -69,7 +69,7 @@ def check_update(is_published: Callable[[str], bool]) -> List[Article]:
     )
 
     nikkei_articles = _process_articles(
-        NIKKEI_RSS_URL, Media.NIKKEI, is_published, max_articles=2
+        NIKKEI_RSS_URL, Media.NIKKEI, is_published, max_articles=1
     )
 
     guardian_articles = _process_articles(
