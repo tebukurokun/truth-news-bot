@@ -251,7 +251,7 @@ def _post_and_save(
             return
         compose_truth(user_name, password, token, content)
         add_url(article.link, article.title, media)
-        logger.info(f"Published article: {article.title} - {article.link}")
+        logger.info(f"Published: {article.title} - {article.link}")
 
     except Exception as e:
         raise e
