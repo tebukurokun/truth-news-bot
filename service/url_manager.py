@@ -52,12 +52,12 @@ class URLManager:
             """
             )
 
-            # インデックス作成
+            # urlとtitleの複合インデックス作成
             conn.execute(
-                "CREATE UNIQUE INDEX IF NOT EXISTS idx_published_urls_url ON published_urls(url)"
-            )
-            conn.execute(
-                "CREATE INDEX IF NOT EXISTS idx_published_urls_published_at ON published_urls(published_at)"
+                """
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_url_title
+                ON published_urls (url, title)
+            """
             )
             conn.commit()
             logger.info("Database initialized successfully")
