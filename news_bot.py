@@ -208,15 +208,9 @@ def _process_articles(
     articles = get_articles(rss_url)
 
     # 未公開記事のみをフィルタリング
-    unpublished_articles = (
-        [
-            article
-            for article in articles
-            if not is_published(article.link, article.title)
-        ]
-        if media == Media.NHK
-        else [article for article in articles if not is_published(article.link, None)]
-    )
+    unpublished_articles = [
+        article for article in articles if not is_published(article.link, None)
+    ]
 
     # ランダムに指定数を選択
     selected_articles = random.sample(
@@ -252,7 +246,7 @@ def _post_and_save(
     :param token: Truth Socialのトークン
     """
     try:
-        if is_published(article.link, article.title):
+        if is_published(article.link, None):
             # 既に投稿済みのURLの場合はスキップ
             return
         compose_truth(user_name, password, token, content)
