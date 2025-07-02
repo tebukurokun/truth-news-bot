@@ -43,10 +43,11 @@ class URLManager:
                 """
                 CREATE TABLE IF NOT EXISTS published_urls (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    url TEXT NOT NULL UNIQUE,
+                    url TEXT,
                     title TEXT,
                     source TEXT,
-                    published_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    published_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE(url, title)
                 )
             """
             )
