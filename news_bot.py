@@ -49,7 +49,7 @@ GUARDIAN_PASSWORD = os.getenv("GUARDIAN_TRUTHSOCIAL_PASSWORD")
 GUARDIAN_TOKEN = os.getenv("GUARDIAN_TRUTHSOCIAL_TOKEN")
 
 
-def check_update(is_published: Callable[[str], bool]) -> List[Article]:
+def check_update(is_published: Callable[[str, Optional[str]], bool]) -> List[Article]:
     nhk_articles = _process_articles(
         NHK_RSS_URL, Media.NHK, is_published, max_articles=2
     )
@@ -99,7 +99,7 @@ def check_update(is_published: Callable[[str], bool]) -> List[Article]:
 
 def publish(
     article: Article,
-    is_published: Callable[[str], bool],
+    is_published: Callable[[str, Optional[str]], bool],
     add_url: Callable[[str, Optional[str], Optional[Media]], bool],
 ):
     match article.media:
@@ -201,16 +201,22 @@ def publish(
 def _process_articles(
     rss_url: str,
     media: Media,
-    is_published: Callable[[str], bool],
+    is_published: Callable[[str, Optional[str]], bool],
     max_articles: int = 2,
 ) -> List[Article]:
     """記事を取得し、未公開記事からランダムに選択してメディア情報を設定"""
     articles = get_articles(rss_url)
 
     # 未公開記事のみをフィルタリング
-    unpublished_articles = [
-        article for article in articles if not is_published(article.link)
-    ]
+    unpublished_articles = (
+        [
+            article
+            for article in articles
+            if not is_published(article.link, article.title)
+        ]
+        if media == Media.NHK
+        else [article for article in articles if not is_published(article.link, None)]
+    )
 
     # ランダムに指定数を選択
     selected_articles = random.sample(
@@ -228,7 +234,7 @@ def _post_and_save(
     article: Article,
     content: str,
     media: Media,
-    is_published: Callable[[str], bool],
+    is_published: Callable[[str, Optional[str]], bool],
     add_url: Callable[[str, Optional[str], Optional[Media]], bool],
     user_name: str,
     password: str,
@@ -246,7 +252,7 @@ def _post_and_save(
     :param token: Truth Socialのトークン
     """
     try:
-        if is_published(article.link):
+        if is_published(article.link, article.title):
             # 既に投稿済みのURLの場合はスキップ
             return
         compose_truth(user_name, password, token, content)

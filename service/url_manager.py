@@ -61,12 +61,18 @@ class URLManager:
             conn.commit()
             logger.info("Database initialized successfully")
 
-    def is_published(self, url: str) -> bool:
+    def is_published(self, url: str, title: str = None) -> bool:
         """URLが既に投稿済みかチェック"""
         with self.get_connection() as conn:
-            result = conn.execute(
-                "SELECT 1 FROM published_urls WHERE url = ? LIMIT 1", (url,)
-            ).fetchone()
+            if title:
+                result = conn.execute(
+                    "SELECT 1 FROM published_urls WHERE url = ? AND title = ? LIMIT 1",
+                    (url, title),
+                ).fetchone()
+            else:
+                result = conn.execute(
+                    "SELECT 1 FROM published_urls WHERE url = ? LIMIT 1", (url,)
+                ).fetchone()
             return result is not None
 
     def add_url(
