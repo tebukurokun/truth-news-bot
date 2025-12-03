@@ -63,6 +63,7 @@ def sns_publisher():
 
 
 if __name__ == "__main__":
+    logger.info("main started")
     threading.Thread(target=rss_checker, daemon=True).start()
     threading.Thread(target=sns_publisher, daemon=True).start()
 

@@ -19,7 +19,7 @@ logging.basicConfig(
 
 BASE_URL = "https://truthsocial.com"
 API_BASE_URL = "https://truthsocial.com/api"
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36 OPR/124.0.0.0"
 
 # Oauth client credentials, from https://truthsocial.com/packs/js/application-d77ef3e9148ad1d0624c.js
 CLIENT_ID = "F73RWi1Ik75RCUnK1kkgGBQuJHgZ7AZnmst1QJnDLJQ"
@@ -96,7 +96,7 @@ class Api:
     def _post(self, url: str, params: dict = None) -> Any:
         resp = self._make_session().post(
             API_BASE_URL + url,
-            params=params,
+            json=params,
             proxies=proxies,
             impersonate="chrome110",
             headers={
@@ -105,6 +105,7 @@ class Api:
                 "Accept": "application/json, text/plain, */*",
                 "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
                 "Accept-Encoding": "gzip, deflate, br, zstd",
+                "content-type": "application/json",
                 "Upgrade-Insecure-Requests": "1",
                 "Referer": "https://truthsocial.com/",
                 "Origin": "https://truthsocial.com",
