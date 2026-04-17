@@ -43,11 +43,6 @@ NIKKEI_USERNAME = os.getenv("NIKKEI_TRUTHSOCIAL_USERNAME")
 NIKKEI_PASSWORD = os.getenv("NIKKEI_TRUTHSOCIAL_PASSWORD")
 NIKKEI_TOKEN = os.getenv("NIKKEI_TRUTHSOCIAL_TOKEN")
 
-GUARDIAN_RSS_URL = "https://www.theguardian.com/international/rss"
-GUARDIAN_USERNAME = os.getenv("GUARDIAN_TRUTHSOCIAL_USERNAME")
-GUARDIAN_PASSWORD = os.getenv("GUARDIAN_TRUTHSOCIAL_PASSWORD")
-GUARDIAN_TOKEN = os.getenv("GUARDIAN_TRUTHSOCIAL_TOKEN")
-
 
 def check_update(is_published: Callable[[str, Optional[str]], bool]) -> List[Article]:
     nhk_articles = _process_articles(
@@ -72,17 +67,12 @@ def check_update(is_published: Callable[[str, Optional[str]], bool]) -> List[Art
         NIKKEI_RSS_URL, Media.NIKKEI, is_published, max_articles=1
     )
 
-    guardian_articles = _process_articles(
-        GUARDIAN_RSS_URL, Media.GUARDIAN, is_published, max_articles=1
-    )
-
     if (
         not nhk_articles
         and not asahi_sankei_articles
         and not bbc_articles
         and not cnn_articles
         and not nikkei_articles
-        and not guardian_articles
     ):
         logger.debug("no article")
         return []
@@ -93,7 +83,6 @@ def check_update(is_published: Callable[[str, Optional[str]], bool]) -> List[Art
         + bbc_articles
         + cnn_articles
         + nikkei_articles
-        + guardian_articles
     )
 
 
@@ -181,20 +170,6 @@ def publish(
                 NIKKEI_USERNAME,
                 NIKKEI_PASSWORD,
                 NIKKEI_TOKEN,
-            )
-
-        case Media.GUARDIAN:
-            content = f"{article.title}\n{article.link}\n#guardian_news #inkei_news"
-
-            _post_and_save(
-                article,
-                content,
-                article.media,
-                is_published,
-                add_url,
-                GUARDIAN_USERNAME,
-                GUARDIAN_PASSWORD,
-                GUARDIAN_TOKEN,
             )
 
 

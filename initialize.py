@@ -11,7 +11,6 @@ BBC_YOUTUBE_RSS_URL = (
 )
 CNN_RSS_URL = "http://feeds.cnn.co.jp/rss/cnn/cnn.rdf"
 NIKKEI_RSS_URL = "https://assets.wor.jp/rss/rdf/nikkei/news.rdf"
-GUARDIAN_RSS_URL = "https://www.theguardian.com/international/rss"
 
 
 # URLManager初期化
@@ -38,7 +37,6 @@ def initialize_previous_urls():
     initialize_previous_url(BBC_YOUTUBE_RSS_URL)
     initialize_previous_url(CNN_RSS_URL)
     initialize_previous_url(NIKKEI_RSS_URL)
-    initialize_previous_url(GUARDIAN_RSS_URL)
 
 
 if __name__ == "__main__":
