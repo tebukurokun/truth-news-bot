@@ -1,5 +1,7 @@
 [Unit]
 Description=Run clean.py in truth-bot container
+After=docker.service
+Requires=docker.service
 
 [Service]
 Type=oneshot

@@ -6,3 +6,6 @@ Requires=docker.service
 [Service]
 Type=oneshot
 ExecStart=/usr/local/bin/restart_truth_bot.sh
+# Type=oneshot の TimeoutStartSec は既定で infinity。
+# `compose up --wait` がハングした場合に備えて明示的に上限を設ける。
+TimeoutStartSec=300
