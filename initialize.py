@@ -1,6 +1,12 @@
+import socket
+
 import feedparser
 
 from service.url_manager import URLManager
+
+# feedparser は timeout 引数を持たず、既定のソケットタイムアウト（無制限）に従う。
+# docker exec -d で起動するとハングに気づけないため、上限を設ける。
+socket.setdefaulttimeout(30)
 
 NHK_RSS_URL = "https://news.web.nhk/n-data/conf/na/rss/cat0.xml"
 ASAHI_RSS_URL = "https://www.asahi.com/rss/asahi/newsheadlines.rdf"

@@ -1,5 +1,6 @@
 import os
 import queue
+import socket
 import threading
 import time
 
@@ -11,6 +12,11 @@ from utils import setup_logger
 
 logger = setup_logger(__name__)
 load_dotenv()  # take environment variables from .env.
+
+# feedparser は timeout 引数を持たず、既定のソケットタイムアウト（無制限）に従う。
+# 応答しないフィードサーバで rss_checker が無期限ブロックするのを防ぐ。
+# curl_cffi は libcurl を使うため、Truth Social への投稿側には影響しない。
+socket.setdefaulttimeout(30)
 
 
 # queue.Queue()を使用して、記事をキューに入れる
@@ -25,11 +31,17 @@ url_manager = URLManager()
 
 def rss_checker():
     while True:
-        articles = check_update(url_manager.is_published)
+        try:
+            articles = check_update(url_manager.is_published)
 
-        if articles:
-            for article in articles:
-                article_queue.put((article, 0))
+            if articles:
+                for article in articles:
+                    article_queue.put((article, 0))
+
+        except Exception:
+            # ここで握らないとスレッドが死に、プロセスは生きたまま
+            # ニュース取得だけが停止する（restart も healthcheck も検知できない）。
+            logger.exception("RSS check failed")
 
         time.sleep(300)
 

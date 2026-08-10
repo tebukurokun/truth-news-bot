@@ -117,6 +117,10 @@ class Api:
 
         logger.info(vars(resp))
 
+        # ステータスを見ないと 401/429/5xx が正常な戻り値として返り、
+        # 呼び出し側で「投稿済み」として記録されてしまう。
+        resp.raise_for_status()
+
         return resp.json()
 
     def compose_truth(self, message: str):
