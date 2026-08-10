@@ -2,7 +2,7 @@ services:
   truth-bot:
     container_name: "truth-bot"
     build: .
-    tty: true
+    command: poetry run python -u main.py
     env_file: production.env
     restart: always
     volumes:

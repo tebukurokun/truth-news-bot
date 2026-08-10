@@ -25,13 +25,11 @@ poetry run pylint <target>
 
 ```bash
 docker compose up -d --build
-docker exec -d truth-bot poetry run python -u main.py   # ← ボット本体はこれで起動する
 docker logs truth-bot --tail=100
 ```
 
-**重要**: `docker compose up` はコンテナを立ち上げるだけ（`tty: true` で待機）で、
-ボットは起動しない。必ず `docker exec` で `main.py` を明示的に起動する。
-そのため `docker compose restart` してもボットは自動復帰しない点に注意。
+`main.py` は docker-compose の `command:` で起動する（= コンテナの PID 1）。
+これにより `restart: always` がボットのクラッシュ時と VPS 再起動時の両方で効く。
 
 ### メンテナンススクリプト
 
@@ -108,6 +106,8 @@ truthbrush/      stanfordio/truthbrush をベンダリングした Truth Social 
   この DB を消すと全記事が未投稿扱いになり大量投稿が発生する。消した場合は必ず `initialize.py` を先に実行する。
 - `truthbrush/` は外部リポジトリのベンダリングコード。上流の変更を取り込む場合は
   `compose_truth` と `_post` のヘッダ周り（Truth Social 側の変更に追随して手を入れている）を上書きしないよう注意。
-- ログは JST 表示。Docker 上では `/proc/1/fd/1` へも書き出して `docker logs` に流している。
-  ログレベルは env `LOG_LEVEL`（既定 INFO）。
+- ログは JST 表示。ログレベルは env `LOG_LEVEL`（既定 INFO）。
+  `main.py` は PID 1 なので stdout がそのまま `docker logs` に流れる。
+  `docker exec` で起動した各スクリプトは stdout が拾われないため、`/proc/1/fd/1` へも書き出している
+  （`utils/logger_config.py`）。この分岐は `os.getpid() != 1` で判定していて、外すと本体のログが二重に出る。
 - 例外は基本的に握りつぶさず `main.py` の sns_publisher までバブルアップさせ、リトライ機構に載せる設計。

@@ -66,8 +66,9 @@ def setup_logger(name=__name__):
     handler.setFormatter(formatter)
     logger.addHandler(handler)
 
-    # FileHandler (Docker環境用)
-    if os.path.exists("/proc/1/fd/1"):
+    # FileHandler (docker exec で起動したスクリプト用)
+    # 自身がPID 1のときはStreamHandlerと出力先が同一になり二重出力になるため付けない
+    if os.getpid() != 1 and os.path.exists("/proc/1/fd/1"):
         handler2 = FileHandler("/proc/1/fd/1")
         handler2.setFormatter(formatter)
         logger.addHandler(handler2)
