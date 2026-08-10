@@ -14,7 +14,7 @@ logger = setup_logger(__name__)
 
 load_dotenv()  # take environment variables from .env.
 
-NHK_RSS_URL = "https://www3.nhk.or.jp/rss/news/cat0.xml"
+NHK_RSS_URL = "https://news.web.nhk/n-data/conf/na/rss/cat0.xml"
 NHK_USERNAME = os.getenv("NHK_TRUTHSOCIAL_USERNAME")
 NHK_PASSWORD = os.getenv("NHK_TRUTHSOCIAL_PASSWORD")
 NHK_TOKEN = os.getenv("NHK_TRUTHSOCIAL_TOKEN")

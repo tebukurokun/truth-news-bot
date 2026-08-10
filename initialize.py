@@ -2,7 +2,7 @@ import feedparser
 
 from service.url_manager import URLManager
 
-NHK_RSS_URL = "https://www3.nhk.or.jp/rss/news/cat0.xml"
+NHK_RSS_URL = "https://news.web.nhk/n-data/conf/na/rss/cat0.xml"
 ASAHI_RSS_URL = "https://www.asahi.com/rss/asahi/newsheadlines.rdf"
 SANKEI_RSS_URL = "https://assets.wor.jp/rss/rdf/sankei/flash.rdf"
 BBC_WEB_RSS_URL = "http://feeds.bbci.co.uk/japanese/rss.xml"

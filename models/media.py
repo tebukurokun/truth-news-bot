@@ -7,4 +7,3 @@ class Media(Enum):
     BBC = "bbc"
     CNN = "cnn"
     NIKKEI = "nikkei"
-    GUARDIAN = "guardian"
