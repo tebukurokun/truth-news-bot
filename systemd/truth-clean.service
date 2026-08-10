@@ -1,0 +1,6 @@
+[Unit]
+Description=Run clean.py in truth-bot container
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/run_clean.sh

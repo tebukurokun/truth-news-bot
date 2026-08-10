@@ -35,9 +35,39 @@ docker logs truth-bot --tail=100
 
 ```bash
 docker exec -d truth-bot poetry run python -u initialize.py  # 各RSSの現時点の記事を「投稿済み」として登録（初回導入・投稿爆発の防止）
-docker exec -d truth-bot poetry run python -u clean.py       # 7日より古い published_urls を削除
+docker exec -d truth-bot poetry run python -u clean.py       # 7日より古い published_urls を削除（通常は systemd timer で自動実行）
 docker exec -d truth-bot poetry run python -u migration.py   # data_files/*.txt からのURL移行（レガシー・通常不要）
 ```
+
+### 定期実行（VPS の systemd timer）
+
+VPS 側では以下の独自 timer を有効にして運用している。
+
+| timer | スケジュール | 内容 |
+| --- | --- | --- |
+| `truth-clean.timer` | 毎日 03:00 JST | `truth-clean.service` → `/usr/local/bin/run_clean.sh` が `clean.py` を実行（古い published_urls の削除） |
+| `restart-truth-bot.timer` | 毎週月曜 05:00 JST | `restart-truth-bot.service` → `/usr/local/bin/restart_truth_bot.sh` が `docker compose stop && up -d` |
+
+そのため `clean.py` を手動で叩く必要は通常ない。
+他に動いているのは OS 標準の `dnf-makecache` / `logrotate` / `systemd-tmpfiles-clean` のみ。
+
+**ユニットとスクリプトの実体は `systemd/` にあり、リポジトリを正とする。**
+VPS 上の `/etc/systemd/system` と `/usr/local/bin` は、そこからコピーして配置する。
+
+```bash
+# VPS 上
+git pull
+sudo ./systemd/install.sh check     # 配置済みとリポジトリの差分を確認
+sudo ./systemd/install.sh install   # コピー + restorecon + daemon-reload + enable --now
+```
+
+`/etc/systemd/system` へシンボリックリンクを張らないこと。リポジトリはホームディレクトリ配下
+（`/home/rocky/truth-news-bot`）にあるため SELinux ラベルが `user_home_t` になり、systemd が
+ユニットを読めなくなる。緊急対応で VPS 上を直接編集した場合は、`install.sh check` が差分を検出するので
+必ずリポジトリ側に取り込んで戻すこと。
+
+なお `restart_truth_bot.sh` は `cd /home/rocky/truth-news-bot` をハードコードしている。
+デプロイ先を変える場合はここも直す。
 
 ## アーキテクチャ
 

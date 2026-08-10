@@ -1,0 +1,8 @@
+[Unit]
+Description=truth-bot: compose restart and run main.py
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/restart_truth_bot.sh
