@@ -32,6 +32,15 @@ class LoginErrorException(Exception):
     pass
 
 
+class PostErrorException(Exception):
+    pass
+
+
+def _is_created_status(resp: Any) -> bool:
+    """投稿レスポンスが実際に作成されたステータスかどうか."""
+    return isinstance(resp, dict) and bool(resp.get("id"))
+
+
 class Api:
     def __init__(self, username: str = None, password: str = None, token: str = None):
         self.ratelimit_max = 300
@@ -125,7 +134,31 @@ class Api:
 
     def compose_truth(self, message: str):
         self.__check_login()
-        return self._post("/v1/statuses", {"status": message})
+
+        resp = self._post("/v1/statuses", {"status": message})
+        if _is_created_status(resp):
+            return resp
+
+        # トークンが失効していても Truth Social は 200 と空の JSON ({}) を返す。
+        # ステータスコードでは検知できないので、作成されたステータスの id の
+        # 有無で成否を判定する。ここを緩めると投稿できていない記事が
+        # 「投稿済み」として DB に登録され、二度と投稿されなくなる。
+        logger.warning(
+            "compose_truth returned no status id (auth token may be expired)."
+        )
+
+        if self.__username is not None and self.__password is not None:
+            # username/password があればトークンを取り直して 1 度だけやり直す。
+            self.auth_id = self.get_auth_id(self.__username, self.__password)
+
+            resp = self._post("/v1/statuses", {"status": message})
+            if _is_created_status(resp):
+                logger.info("Re-authenticated and posted successfully.")
+                return resp
+
+        raise PostErrorException(
+            f"Truth Social returned 200 but created no status: {resp}"
+        )
 
     def _get_paginated(self, url: str, params: dict = None, resume: str = None) -> Any:
         next_link = API_BASE_URL + url
@@ -355,14 +388,15 @@ class Api:
                     "user-agent": USER_AGENT,
                 },
             )
-            print(sess_req)
             sess_req.raise_for_status()
         except Exception as e:
+            # None を返すと呼び出し側で "Bearer " + None になり原因が分からなくなる。
             logger.error(f"Failed login request: {str(e)}")
-            return None
+            raise LoginErrorException(f"Failed login request: {e}") from e
 
-        if not sess_req.json()["access_token"]:
-            raise ValueError("Invalid truthsocial.com credentials provided!")
+        access_token = sess_req.json().get("access_token")
+        if not access_token:
+            raise LoginErrorException("Invalid truthsocial.com credentials provided!")
 
-        print(sess_req.json()["access_token"])
-        return sess_req.json()["access_token"]
+        # アクセストークンは秘密情報なのでログに出さない。
+        return access_token

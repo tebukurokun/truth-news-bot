@@ -105,6 +105,21 @@ truthbrush/      stanfordio/truthbrush をベンダリングした Truth Social 
 重複チェックは **2 箇所**で行う（RSS 取得直後のフィルタと、投稿直前の `_post_and_save` 内）。
 キュー滞留中に別経路で投稿されるケースを防ぐためなので、後者を「冗長」として消さないこと。
 
+### 投稿成否の判定（ステータスコードを信用しない）
+
+**Truth Social はトークンが失効していても `POST /api/v1/statuses` に `200 OK` を返す。**
+違うのは本文だけで、成功時は作成された Status オブジェクト（`id` を含む ~1.3 KB）、
+失効時は空の `{}`（content-length 28）。そのため `raise_for_status()` では検知できず、
+`truthbrush/api.py` の `compose_truth` が `_is_created_status()` で **ステータス `id` の有無**を見る。
+
+ここを緩めると、投稿できていない記事が `_post_and_save` で「投稿済み」として DB に登録され、
+二度と投稿されなくなる。
+
+id が無い場合は username/password があれば OAuth で取り直して 1 度だけ再投稿する
+（token だけのアカウントは `PostErrorException` を投げて `main.py` のリトライに載る）。
+再取得したトークンを使い回すため、`service/truth_social.py` は `Api` を認証情報ごとにキャッシュしている
+（投稿ごとに作り直すと毎回ログインが走る）。詳細は README の "posting: why the response body is checked" 参照。
+
 ### メディア追加時に触る場所
 
 `news_bot.py` に集約されている。新しいメディアを足す場合:
