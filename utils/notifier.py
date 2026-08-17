@@ -89,7 +89,8 @@ def _error_kind(record: LogRecord) -> str:
     return record.getMessage().split(":")[0][:80]
 
 
-_handler: NtfyHandler | None = None
+# 定数ではなく遅延初期化のキャッシュなので UPPER_CASE にはしない
+_handler: NtfyHandler | None = None  # pylint: disable=invalid-name
 _handler_lock = Lock()
 
 

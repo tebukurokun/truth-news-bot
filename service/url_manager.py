@@ -39,8 +39,7 @@ class URLManager:
         """データベースとテーブルの初期化"""
         with self.get_connection() as conn:
             # メインテーブル作成
-            conn.execute(
-                """
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS published_urls (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     url TEXT,
@@ -49,16 +48,13 @@ class URLManager:
                     published_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     UNIQUE(url, title)
                 )
-            """
-            )
+            """)
 
             # urlとtitleの複合インデックス作成
-            conn.execute(
-                """
+            conn.execute("""
                 CREATE UNIQUE INDEX IF NOT EXISTS idx_url_title
                 ON published_urls (url, title)
-            """
-            )
+            """)
             conn.commit()
             logger.info("Database initialized successfully")
 
