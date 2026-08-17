@@ -151,6 +151,12 @@ id が無い場合は username/password があれば OAuth で取り直して 1 
   この DB を消すと全記事が未投稿扱いになり大量投稿が発生する。消した場合は必ず `initialize.py` を先に実行する。
 - `truthbrush/` は外部リポジトリのベンダリングコード。上流の変更を取り込む場合は
   `compose_truth` と `_post` のヘッダ周り（Truth Social 側の変更に追随して手を入れている）を上書きしないよう注意。
+- **ERROR / CRITICAL のログは ntfy にプッシュ通知される**（`utils/notifier.py` の `NtfyHandler` を
+  `setup_logger` が全 logger に付ける）。通知先は env `NTFY_URL`、未設定なら送信しない。
+  トピック名自体が合言葉なので URL をコードやコミットに含めないこと。
+  種類ごと（メッセージの `:` より前）に `NTFY_COOLDOWN_SECONDS`（既定 1800 秒）で抑制する。
+  トークン失効時は記事ごとに `Max retry exceeded` が出るため、この抑制を外すと通知が溢れる。
+  送信失敗はハンドラ内で握りつぶす（通知経路の障害で投稿を止めないため）。
 - ログは JST 表示。ログレベルは env `LOG_LEVEL`（既定 INFO）。
   `main.py` は PID 1 なので stdout がそのまま `docker logs` に流れる。
   `docker exec` で起動した各スクリプトは stdout が拾われないため、`/proc/1/fd/1` へも書き出している

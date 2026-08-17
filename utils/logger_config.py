@@ -13,6 +13,8 @@ from logging import (
 )
 from zoneinfo import ZoneInfo
 
+from .notifier import get_ntfy_handler
+
 
 class JSTFormatter(Formatter):
     def formatTime(self, record, datefmt=None):
@@ -72,6 +74,12 @@ def setup_logger(name=__name__):
         handler2 = FileHandler("/proc/1/fd/1")
         handler2.setFormatter(formatter)
         logger.addHandler(handler2)
+
+    # ntfy 通知 (ERROR 以上のみ。NTFY_URL 未設定なら何もしない)
+    # ハンドラは全 logger で共有し、通知の抑制状態をプロセス全体でひとつにする。
+    ntfy_handler = get_ntfy_handler()
+    ntfy_handler.setFormatter(formatter)
+    logger.addHandler(ntfy_handler)
 
     logger.setLevel(log_level)
     logger.propagate = False

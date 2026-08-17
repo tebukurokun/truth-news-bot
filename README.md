@@ -18,6 +18,12 @@ NHK_TRUTHSOCIAL_PASSWORD=bar
 ASAHI_SANKEI_TRUTHSOCIAL_USERNAME=foo
 ASAHI_SANKEI_TRUTHSOCIAL_PASSWORD=bar
 
+# optional
+NTFY_URL=https://ntfy.sh/<topic>   # error notifications (see "error notifications")
+NTFY_COOLDOWN_SECONDS=1800
+LOG_LEVEL=INFO
+MAX_RETRY=10
+
 ```
 
 ## usage
@@ -100,6 +106,38 @@ docker logs truth-bot --tail=200 2>&1 | grep -v "truthbrush.api:_post"
 
 Note that `truthbrush` logs through loguru in **UTC**, while the app logs in **JST**.
 The same event appears with timestamps 9 hours apart.
+
+## error notifications
+
+`ERROR` and `CRITICAL` logs are pushed to [ntfy](https://ntfy.sh) so that a broken bot does
+not sit unnoticed until someone reads `docker logs`. `utils/notifier.py` attaches an
+`NtfyHandler` to every logger built by `setup_logger`.
+
+Set the topic URL in `production.env` — **the topic name is the only secret protecting it,
+so keep it out of git**:
+
+```bash
+NTFY_URL=https://ntfy.sh/<topic>
+```
+
+Without `NTFY_URL` nothing is sent, which is the default for local development.
+Subscribe from the ntfy app or with `curl -s https://ntfy.sh/<topic>/json`.
+
+What gets pushed:
+
+- `Max retry exceeded` — an article failed `MAX_RETRY` times and was dropped. An expired
+  token that cannot be refreshed shows up here, roughly `MAX_RETRY * 11` seconds after the
+  first failure.
+- `RSS check failed` — the RSS thread raised, traceback included in the body.
+- any other `ERROR` / `CRITICAL` from the app loggers.
+
+Per-post `WARNING`s (`Publish failed`) are **not** pushed; they are normal and transient.
+
+Notifications are throttled per error kind (the text before the first `:`), one every
+`NTFY_COOLDOWN_SECONDS` (default 1800). Suppressed occurrences are counted and reported in
+the next notification of that kind — otherwise an expired token would fire one push per
+article. Sending is capped at a 5 s timeout and never raises: if ntfy is down, the bot
+keeps posting and only the notification is lost.
 
 ## posting: why the response body is checked, not the status code
 
