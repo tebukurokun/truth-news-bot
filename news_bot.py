@@ -1,5 +1,6 @@
 import os
 import random
+from datetime import datetime, timedelta, timezone
 from typing import List, Callable, Optional
 
 from dotenv import load_dotenv
@@ -43,6 +44,19 @@ NIKKEI_USERNAME = os.getenv("NIKKEI_TRUTHSOCIAL_USERNAME")
 NIKKEI_PASSWORD = os.getenv("NIKKEI_TRUTHSOCIAL_PASSWORD")
 NIKKEI_TOKEN = os.getenv("NIKKEI_TRUTHSOCIAL_TOKEN")
 
+# 投稿間隔の長いメディア（朝日・産経 / 日経）は、記事の生成が投稿を上回るため
+# 配信から一定時間より古い記事は投稿せずに捨てる。main.py 側でも
+# キューから取り出した時点で同じ判定をする（滞留中に古くなるため）。
+SLOW_MEDIA_MAX_AGE = timedelta(hours=int(os.getenv("SLOW_MEDIA_MAX_AGE_HOURS", 5)))
+
+
+def is_stale(article: Article, max_age: Optional[timedelta]) -> bool:
+    """配信日時が max_age より古いか。日時が取れていない記事は古くない扱い。"""
+    if max_age is None or article.published_at is None:
+        return False
+
+    return datetime.now(timezone.utc) - article.published_at > max_age
+
 
 def check_update(is_published: Callable[[str, Optional[str]], bool]) -> List[Article]:
     nhk_articles = _process_articles(
@@ -50,9 +64,17 @@ def check_update(is_published: Callable[[str, Optional[str]], bool]) -> List[Art
     )
 
     asahi_sankei_articles = _process_articles(
-        ASAHI_RSS_URL, Media.ASAHI_SANKEI, is_published, max_articles=1
+        ASAHI_RSS_URL,
+        Media.ASAHI_SANKEI,
+        is_published,
+        max_articles=1,
+        max_age=SLOW_MEDIA_MAX_AGE,
     ) + _process_articles(
-        SANKEI_RSS_URL, Media.ASAHI_SANKEI, is_published, max_articles=1
+        SANKEI_RSS_URL,
+        Media.ASAHI_SANKEI,
+        is_published,
+        max_articles=1,
+        max_age=SLOW_MEDIA_MAX_AGE,
     )
 
     bbc_articles = _process_articles(
@@ -64,7 +86,11 @@ def check_update(is_published: Callable[[str, Optional[str]], bool]) -> List[Art
     )
 
     nikkei_articles = _process_articles(
-        NIKKEI_RSS_URL, Media.NIKKEI, is_published, max_articles=1
+        NIKKEI_RSS_URL,
+        Media.NIKKEI,
+        is_published,
+        max_articles=1,
+        max_age=SLOW_MEDIA_MAX_AGE,
     )
 
     if (
@@ -90,12 +116,18 @@ def publish(
     article: Article,
     is_published: Callable[[str, Optional[str]], bool],
     add_url: Callable[[str, Optional[str], Optional[Media]], bool],
-):
+) -> bool:
+    """
+    記事を投稿する。実際に投稿したら True、投稿せずスキップしたら False を返す。
+
+    呼び出し側（main.py）は True のときだけ投稿間隔をスリープする。
+    重複や連載スキップで 10 分待つと、そのぶん投稿が止まってしまうため。
+    """
     match article.media:
         case Media.NHK:
             content = f"{article.title}\n{article.link}\n#nhk_news #inkei_news"
 
-            _post_and_save(
+            return _post_and_save(
                 article,
                 content,
                 article.media,
@@ -116,11 +148,11 @@ def publish(
             if article.title.startswith("【") or article.title.startswith("＜"):
                 # "【" or "＜"のときはスキップし投稿済みurlとして保存.
                 add_url(article.link, article.title, article.media)
-                return
+                return False
 
             content = f"{article.title}\n{article.link}\n{tag}"
 
-            _post_and_save(
+            return _post_and_save(
                 article,
                 content,
                 article.media,
@@ -133,7 +165,7 @@ def publish(
 
         case Media.BBC:
             content = f"{article.title}\n{article.link}\n#bbc_news #inkei_news"
-            _post_and_save(
+            return _post_and_save(
                 article,
                 content,
                 article.media,
@@ -147,7 +179,7 @@ def publish(
         case Media.CNN:
             content = f"{article.title}\n{article.link}\n#cnn_news #inkei_news"
 
-            _post_and_save(
+            return _post_and_save(
                 article,
                 content,
                 article.media,
@@ -161,7 +193,7 @@ def publish(
         case Media.NIKKEI:
             content = f"{article.title}\n{article.link}\n #nikkei_news #inkei_news"
 
-            _post_and_save(
+            return _post_and_save(
                 article,
                 content,
                 article.media,
@@ -172,12 +204,17 @@ def publish(
                 NIKKEI_TOKEN,
             )
 
+        case _:
+            logger.warning(f"Unknown media: {article.media} - {article.link}")
+            return False
+
 
 def _process_articles(
     rss_url: str,
     media: Media,
     is_published: Callable[[str, Optional[str]], bool],
     max_articles: int = 2,
+    max_age: Optional[timedelta] = None,
 ) -> List[Article]:
     """記事を取得し、未公開記事からランダムに選択してメディア情報を設定"""
     articles = get_articles(rss_url)
@@ -186,6 +223,19 @@ def _process_articles(
     unpublished_articles = [
         article for article in articles if not is_published(article.link, None)
     ]
+
+    # 古い記事は母集団から外す。投稿間隔の長いメディアでは、これをやらないと
+    # 抽選の母集団が古い記事で埋まり、キューも古い記事ばかりになる。
+    if max_age is not None:
+        fresh_articles = [
+            article
+            for article in unpublished_articles
+            if not is_stale(article, max_age)
+        ]
+        stale_count = len(unpublished_articles) - len(fresh_articles)
+        if stale_count:
+            logger.debug(f"Skipped {stale_count} stale entries - {rss_url}")
+        unpublished_articles = fresh_articles
 
     # ランダムに指定数を選択
     selected_articles = random.sample(
@@ -208,9 +258,10 @@ def _post_and_save(
     user_name: str,
     password: str,
     token: str,
-):
+) -> bool:
     """
     指定された記事を投稿し、投稿済みのURLを保存する関数.
+    投稿したら True、既に投稿済みでスキップしたら False を返す.
     :param article: 投稿する記事
     :param content: 投稿する内容
     :param media: 記事のメディア情報
@@ -223,10 +274,11 @@ def _post_and_save(
     try:
         if is_published(article.link, None):
             # 既に投稿済みのURLの場合はスキップ
-            return
+            return False
         compose_truth(user_name, password, token, content)
         add_url(article.link, article.title, media)
         logger.info(f"Published: {article.title} - {article.link}")
+        return True
 
     except Exception as e:
         raise e

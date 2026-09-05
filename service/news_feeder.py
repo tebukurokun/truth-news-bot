@@ -1,4 +1,6 @@
-from typing import List
+import calendar
+from datetime import datetime, timezone
+from typing import List, Optional
 
 import feedparser
 
@@ -6,6 +8,22 @@ from models import Article
 from utils import setup_logger
 
 logger = setup_logger(__name__)
+
+
+def _published_at(entry) -> Optional[datetime]:
+    """
+    エントリの配信日時を UTC aware な datetime で返す。取れなければ None。
+
+    RSS 1.0 (RDF) の dc:date は published_parsed ではなく updated_parsed に入る。
+    朝日・産経・日経はいずれも RDF なので、両方見ないと日時が取れない。
+    """
+    parsed = entry.get("published_parsed") or entry.get("updated_parsed")
+    if not parsed:
+        return None
+
+    # *_parsed は UTC の struct_time なので、timegm で UTC として解釈する
+    # （mktime だとローカルタイムとして扱われ、時差の分だけずれる）。
+    return datetime.fromtimestamp(calendar.timegm(parsed), timezone.utc)
 
 
 def get_articles(url: str) -> List[Article]:
@@ -51,7 +69,7 @@ def get_articles(url: str) -> List[Article]:
         if not title or not link:
             skipped += 1
             continue
-        articles.append(Article(title, link))
+        articles.append(Article(title, link, published_at=_published_at(entry)))
 
     if skipped:
         logger.warning(f"Skipped {skipped} entries missing title/link - {url}")

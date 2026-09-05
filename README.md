@@ -23,6 +23,9 @@ NTFY_URL=https://ntfy.sh/<topic>   # error notifications (see "error notificatio
 NTFY_COOLDOWN_SECONDS=1800
 LOG_LEVEL=INFO
 MAX_RETRY=10
+POST_INTERVAL_SECONDS=11        # NHK / BBC / CNN
+SLOW_POST_INTERVAL_SECONDS=600  # asahi_sankei / nikkei
+SLOW_MEDIA_MAX_AGE_HOURS=5      # drop asahi_sankei / nikkei articles older than this
 
 ```
 
@@ -51,6 +54,23 @@ docker exec -d truth-bot poetry run python -u initialize.py
 ```bash
 docker exec -d truth-bot poetry run python -u clean.py
 ```
+
+## posting intervals
+
+Each media has its own queue and publisher thread, so a slow account never blocks the
+others:
+
+| lane | media | interval |
+| --- | --- | --- |
+| default | NHK / BBC / CNN | 11 s (`POST_INTERVAL_SECONDS`) |
+| slow | asahi_sankei | 600 s (`SLOW_POST_INTERVAL_SECONDS`) |
+| slow | nikkei | 600 s (`SLOW_POST_INTERVAL_SECONDS`) |
+
+The slow lanes receive more articles than they can post (the RSS check runs every 5 min),
+so articles published more than `SLOW_MEDIA_MAX_AGE_HOURS` (default 5) ago are dropped
+instead of posted — both when the feed is read and again when the article leaves the queue,
+since it can go stale while waiting. Dropping never consumes the interval, so a slow lane
+still posts one *real* article every 10 minutes. Look for `Dropped stale article` in the log.
 
 ## logs
 
@@ -126,8 +146,10 @@ Subscribe from the ntfy app or with `curl -s https://ntfy.sh/<topic>/json`.
 What gets pushed:
 
 - `Max retry exceeded` — an article failed `MAX_RETRY` times and was dropped. An expired
-  token that cannot be refreshed shows up here, roughly `MAX_RETRY * 11` seconds after the
-  first failure.
+  token that cannot be refreshed shows up here, roughly `MAX_RETRY * <post interval>`
+  seconds after the first failure — that is `MAX_RETRY * 11` for NHK / BBC / CNN, but
+  `MAX_RETRY * 600` (about 100 minutes with the defaults) for asahi_sankei and nikkei,
+  which post on their own 10 minute lanes.
 - `RSS check failed` — the RSS thread raised, traceback included in the body.
 - any other `ERROR` / `CRITICAL` from the app loggers.
 

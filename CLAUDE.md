@@ -73,13 +73,25 @@ sudo ./systemd/install.sh install   # コピー + restorecon + daemon-reload + e
 
 ### 実行フロー
 
-`main.py` が 2 つの daemon スレッドを起動し、`queue.Queue` で繋ぐ生産者・消費者構成。
+`main.py` が daemon スレッドを起動し、`queue.Queue` で繋ぐ生産者・消費者構成。
+投稿間隔がメディアごとに違うため、**キューと publisher はレーンに分かれている**
+（同じキューで待たせると、遅いメディアが他メディアの投稿まで止めてしまう）。
 
 - **rss_checker スレッド** — 300 秒ごとに `news_bot.check_update()` を呼び、
-  未投稿記事を `(article, retry_count)` としてキューに投入。
-- **sns_publisher スレッド** — キューから 1 件取り出して `news_bot.publish()`、
-  **投稿間隔は 11 秒スリープ**（Truth Social のレート制限回避のため。安易に縮めない）。
+  未投稿記事を `(article, retry_count)` として、メディアに対応するキューに投入。
+- **sns_publisher スレッド × 3** — キューから 1 件取り出して `news_bot.publish()`。
   失敗時は retry_count を増やして再エンキューし、`MAX_RETRY`（env、既定 10）超過でログに error を残して破棄。
+
+| レーン | メディア | 投稿間隔 | env |
+| --- | --- | --- | --- |
+| 既定 | NHK / BBC / CNN | 11 秒 | `POST_INTERVAL_SECONDS` |
+| 低速 | 朝日・産経 | 600 秒 | `SLOW_POST_INTERVAL_SECONDS` |
+| 低速 | 日経 | 600 秒 | `SLOW_POST_INTERVAL_SECONDS` |
+
+**投稿間隔（Truth Social のレート制限回避のため。安易に縮めない）をスリープするのは、
+実際に投稿を試みたときだけ**。重複スキップ・連載スキップ・古い記事の破棄では待たずに次へ進む。
+そのため `news_bot.publish()` は「実際に投稿したか」を bool で返す。
+10 分レーンでここで待つと、空振り 1 件で 10 分投稿が止まる。
 
 ### レイヤ構成
 
@@ -137,6 +149,18 @@ id が無い場合は username/password があれば OAuth で取り直して 1 
 
 朝日・産経は `【` または `＞`(`＜`) で始まるタイトルを投稿せず、投稿済みURLとしてだけ登録してスキップする
 （連載・特集ものを除外するため）。
+
+低速レーン（朝日・産経 / 日経）は 10 分に 1 投稿しかできないのに 5 分ごとに最大 2 件生成されるため、
+**配信から `SLOW_MEDIA_MAX_AGE_HOURS`（env、既定 5 時間）より古い記事は捨てる**。判定は 2 箇所:
+
+1. `_process_articles()` の `max_age` — 抽選の母集団から外す（古い記事でキューが埋まるのを防ぐ）
+2. `main.py` の `sns_publisher` — キューに滞留している間に古くなった記事を破棄
+
+配信日時は `Article.published_at`（UTC aware）。RSS 1.0 (RDF) の `dc:date` は feedparser では
+`published_parsed` ではなく **`updated_parsed`** に入るため、`service/news_feeder.py` は両方見る。
+日時が取れない記事は「古くない」扱いで、捨てない。
+朝日のヘッドラインフィードは最新記事でも 2〜3 時間遅れて出てくることがあり、
+3 時間だと朝日だけ一切投稿されない時間帯ができる。既定を 5 時間にしているのはそのため。
 
 ## 認証情報の扱い
 
