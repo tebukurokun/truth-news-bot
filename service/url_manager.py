@@ -78,31 +78,43 @@ class URLManager:
         title: Optional[str] = None,
         source: Optional[Media] = None,
     ) -> bool:
-        """新しいURLを登録"""
-        try:
-            with self.get_connection() as conn:
-                if source:
-                    conn.execute(
-                        """
-                        INSERT INTO published_urls (url, title, source) 
-                        VALUES (?, ?, ?)
-                    """,
-                        (url, title, source.value),
-                    )
-                else:
-                    conn.execute(
-                        """
-                        INSERT INTO published_urls (url, title) 
-                        VALUES (?, ?)
-                    """,
-                        (url, title),
-                    )
-                conn.commit()
-                logger.debug(f"URL added: {url}")
-                return True
-        except sqlite3.IntegrityError:
-            logger.warning(f"URL already exists: {url}")
-            return False
+        """新しいURLを登録。新規登録できたら True、既に登録済みなら False。
+
+        重複は例外ではなく ON CONFLICT DO NOTHING で捌く。同じ記事が複数回
+        キューに入るのは正常な動作（DB に入るのはキューから取り出した時点なので、
+        投稿間隔の長いレーンでは滞留中に rss_checker が同じ記事を再投入する）で、
+        これを IntegrityError にすると get_connection が想定内の重複を
+        ERROR ログに出し、ntfy へ通知が飛んでしまう。
+        ここを例外にしないことで、NOT NULL 違反など本物の IntegrityError だけが
+        main.py のリトライまでバブルアップする。
+        """
+        with self.get_connection() as conn:
+            if source:
+                cursor = conn.execute(
+                    """
+                    INSERT INTO published_urls (url, title, source)
+                    VALUES (?, ?, ?)
+                    ON CONFLICT DO NOTHING
+                """,
+                    (url, title, source.value),
+                )
+            else:
+                cursor = conn.execute(
+                    """
+                    INSERT INTO published_urls (url, title)
+                    VALUES (?, ?)
+                    ON CONFLICT DO NOTHING
+                """,
+                    (url, title),
+                )
+            conn.commit()
+
+            if cursor.rowcount == 0:
+                logger.warning(f"URL already exists: {url}")
+                return False
+
+            logger.debug(f"URL added: {url}")
+            return True
 
     def cleanup_old_urls(self, days: int = 30) -> int:
         """古いURLデータを削除"""
