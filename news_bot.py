@@ -60,7 +60,7 @@ def is_stale(article: Article, max_age: Optional[timedelta]) -> bool:
 
 def check_update(is_published: Callable[[str, Optional[str]], bool]) -> List[Article]:
     nhk_articles = _process_articles(
-        NHK_RSS_URL, Media.NHK, is_published, max_articles=2
+        NHK_RSS_URL, Media.NHK, is_published, max_articles=2, match_title=True
     )
 
     asahi_sankei_articles = _process_articles(
@@ -136,6 +136,7 @@ def publish(
                 NHK_USERNAME,
                 NHK_PASSWORD,
                 NHK_TOKEN,
+                match_title=True,
             )
 
         case Media.ASAHI_SANKEI:
@@ -215,13 +216,24 @@ def _process_articles(
     is_published: Callable[[str, Optional[str]], bool],
     max_articles: int = 2,
     max_age: Optional[timedelta] = None,
+    match_title: bool = False,
 ) -> List[Article]:
-    """記事を取得し、未公開記事からランダムに選択してメディア情報を設定"""
+    """記事を取得し、未公開記事からランダムに選択してメディア情報を設定
+
+    match_title=True にすると重複判定を url+title で行う。NHK は速報記事を
+    同じ URL のままタイトルだけ差し替えることがあり、URL だけで見ると
+    その更新を新着として拾えないため。他メディアで有効にすると、配信元の
+    軽微な表記修正のたびに同じ記事が再投稿されるので既定は False。
+    投稿直前の _post_and_save() にも同じフラグを渡すこと（片方だけだと
+    ここを通ってもキュー取り出し時に弾かれ、永久に投稿されない）。
+    """
     articles = get_articles(rss_url)
 
     # 未公開記事のみをフィルタリング
     unpublished_articles = [
-        article for article in articles if not is_published(article.link, None)
+        article
+        for article in articles
+        if not is_published(article.link, article.title if match_title else None)
     ]
 
     # 古い記事は母集団から外す。投稿間隔の長いメディアでは、これをやらないと
@@ -258,6 +270,7 @@ def _post_and_save(
     user_name: str,
     password: str,
     token: str,
+    match_title: bool = False,
 ) -> bool:
     """
     指定された記事を投稿し、投稿済みのURLを保存する関数.
@@ -270,9 +283,11 @@ def _post_and_save(
     :param user_name: Truth Socialのユーザー名
     :param password: Truth Socialのパスワード
     :param token: Truth Socialのトークン
+    :param match_title: True なら重複判定を url+title で行う（NHK のみ）。
+        _process_articles() の同名フラグと必ず揃える。
     """
     try:
-        if is_published(article.link, None):
+        if is_published(article.link, article.title if match_title else None):
             # 既に投稿済みのURLの場合はスキップ
             return False
         compose_truth(user_name, password, token, content)

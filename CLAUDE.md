@@ -117,6 +117,11 @@ truthbrush/      stanfordio/truthbrush をベンダリングした Truth Social 
 重複チェックは **2 箇所**で行う（RSS 取得直後のフィルタと、投稿直前の `_post_and_save` 内）。
 キュー滞留中に別経路で投稿されるケースを防ぐためなので、後者を「冗長」として消さないこと。
 
+判定キーはメディアによって違う。既定は **URL のみ**だが、**NHK だけ `match_title=True` で
+url+title を見る**（速報記事が同じ URL のままタイトルだけ差し替わるのを更新として拾うため）。
+このフラグは `_process_articles()` と `_post_and_save()` の両方に渡す必要がある。
+片方だけだとフィルタを通った記事が投稿直前に弾かれ、永久に投稿されない。
+
 ### 投稿成否の判定（ステータスコードを信用しない）
 
 **Truth Social はトークンが失効していても `POST /api/v1/statuses` に `200 OK` を返す。**
