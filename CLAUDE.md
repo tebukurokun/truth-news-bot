@@ -7,7 +7,7 @@
 日本語ニュースサイトの RSS を定期的に巡回し、未投稿の記事を Truth Social に自動投稿する Bot。
 メディアごとに別々の Truth Social アカウントへ投稿する（NHK / 朝日・産経 / BBC / CNN / 日経）。
 
-本番環境は **Rocky Linux の VPS** 上で Docker Compose により常駐稼働している。
+本番環境は **Ubuntu の VPS**（`/home/ubuntu/truth-news-bot`）上で Docker Compose により常駐稼働している。
 コードは Python 3.13 / Poetry 管理。テストコードは現状なし。
 
 ## 実行コマンド
@@ -42,6 +42,7 @@ docker exec -d truth-bot poetry run python -u migration.py   # data_files/*.txt 
 ### 定期実行（VPS の systemd timer）
 
 VPS 側では以下の独自 timer を有効にして運用している。
+`OnCalendar` はサーバーのローカル時刻で解釈されるため、VPS のタイムゾーンは `Asia/Tokyo` にしておくこと。
 
 | timer | スケジュール | 内容 |
 | --- | --- | --- |
@@ -49,7 +50,7 @@ VPS 側では以下の独自 timer を有効にして運用している。
 | `restart-truth-bot.timer` | 毎週月曜 05:00 JST | `restart-truth-bot.service` → `/usr/local/bin/restart_truth_bot.sh` が `docker compose stop && up -d` |
 
 そのため `clean.py` を手動で叩く必要は通常ない。
-他に動いているのは OS 標準の `dnf-makecache` / `logrotate` / `systemd-tmpfiles-clean` のみ。
+他は OS 標準の timer のみ。
 
 **ユニットとスクリプトの実体は `systemd/` にあり、リポジトリを正とする。**
 VPS 上の `/etc/systemd/system` と `/usr/local/bin` は、そこからコピーして配置する。
@@ -58,15 +59,15 @@ VPS 上の `/etc/systemd/system` と `/usr/local/bin` は、そこからコピ�
 # VPS 上
 git pull
 sudo ./systemd/install.sh check     # 配置済みとリポジトリの差分を確認
-sudo ./systemd/install.sh install   # コピー + restorecon + daemon-reload + enable --now
+sudo ./systemd/install.sh install   # コピー + daemon-reload + enable --now
 ```
 
-`/etc/systemd/system` へシンボリックリンクを張らないこと。リポジトリはホームディレクトリ配下
-（`/home/rocky/truth-news-bot`）にあるため SELinux ラベルが `user_home_t` になり、systemd が
-ユニットを読めなくなる。緊急対応で VPS 上を直接編集した場合は、`install.sh check` が差分を検出するので
+`/etc/systemd/system` へシンボリックリンクを張らないこと（SELinux 有効環境ではホーム配下のファイルを
+systemd が読めない。`install.sh` は restorecon があればラベルも付け直す）。
+緊急対応で VPS 上を直接編集した場合は、`install.sh check` が差分を検出するので
 必ずリポジトリ側に取り込んで戻すこと。
 
-なお `restart_truth_bot.sh` は `cd /home/rocky/truth-news-bot` をハードコードしている。
+なお `restart_truth_bot.sh` は `cd /home/ubuntu/truth-news-bot` をハードコードしている。
 デプロイ先を変える場合はここも直す。
 
 ## アーキテクチャ

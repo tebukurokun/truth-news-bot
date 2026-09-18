@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-cd /home/rocky/truth-news-bot
+cd /home/ubuntu/truth-news-bot
 
 docker compose stop
 
